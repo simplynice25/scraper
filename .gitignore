@@ -10,6 +10,7 @@ application/csv/*
 
 # Others #
 ######################
+settings.php
 database.yml
 
 # Bins #
