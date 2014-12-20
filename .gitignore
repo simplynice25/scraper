@@ -1,0 +1,44 @@
+# Silex #
+######################
+vendor/*
+composer.lock
+silex.phar
+composer.phar
+src/proxies/*
+application/models/*
+
+# Others #
+######################
+database.yml
+
+# Bins #
+######################
+src/bin/
+web/cache/
+tmp/files/
+web/upload/
+
+# GENERATED #
+#############
+app/src/proxies/*
+
+# Logs #
+######################
+*.log
+
+# TextMate #
+######################
+*.tmproj
+*.tmproject
+tmtags
+
+# OS generated files #
+######################
+*.php~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
