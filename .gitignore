@@ -6,6 +6,7 @@ silex.phar
 composer.phar
 src/proxies/*
 application/models/*
+application/csv/*
 
 # Others #
 ######################
