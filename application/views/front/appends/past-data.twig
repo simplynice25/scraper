@@ -1,0 +1,55 @@
+<span class="past-data-title" data-title="{{ dataTitle }}" style="display:none">{{ dataTitle }}</span>
+<table id="scrapedTable2" class="table table-bordered table-condensed table-hover main-table">
+		<thead>
+		<tr class="active">
+			<th>DATE</th>
+			<th>SUMMARY</th>
+			<th>OPEN</th>
+			<th>CLOSE</th>
+			<th>HIGH</th>
+			<th>LOW</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% if scrapes|length > 0 %}
+
+		{% set summ = {0: "", 1: "---"} %}
+
+		{% for k, scrape in scrapes %}
+		
+		{# For Summary #}
+		{% if scrape.getSummary == 1 %}
+			{% set summ = { 0: "summ-sell", 1: "SELL" } %}
+		{% elseif scrape.getSummary == 2 %}
+			{% set summ = { 0: "summ-buy", 1: "BUY" } %}
+		{% elseif scrape.getSummary == 3 %}
+			{% set summ = { 0: "summ-strong-sell", 1: "STRONG SELL" } %}
+		{% elseif scrape.getSummary == 4 %}
+			{% set summ = { 0: "summ-strong-buy", 1: "STRONG BUY" } %}
+		{% elseif scrape.getSummary == 5 %}
+			{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
+		{% endif %}
+                
+        {% set traded = scrape.getVolume*scrape.getCloseTotal %}
+		<tr>
+            <td>{{ scrape.getCreatedAt|date("Y/m/d") }}</td>
+			<td class="{{ summ[0] }}">
+				{{ summ[1] }} ({% if scrape.getChangePercent > 0 %}+{% endif %}{{ scrape.getChangePercent }}%)
+				<br/>
+				<span>MA: {{ scrape.getMovingAverages }} of {{ scrape.getMovingAveragesTotal }}</span>
+				<br/>
+				<span>TI: {{ scrape.getTechnicalIndicators }} of {{ scrape.getTechnicalIndicatorsTotal }}</span>
+				<br/>
+				<span>VOLUME: {{ scrape.getVolume|number_format }}</span>
+                <br/>
+                <span>TRADED: {{ traded|number_format }}</span>
+			</td>
+			<td>{{ scrape.getOpenTotal }}</td>
+			<td>{{ scrape.getCloseTotal }}</td>
+			<td>{{ scrape.getHighRange }}</td>
+			<td>{{ scrape.getLowRange }}</td>
+		</tr>
+		{% endfor %}
+		{% endif %}
+		<tbody>
+</table>

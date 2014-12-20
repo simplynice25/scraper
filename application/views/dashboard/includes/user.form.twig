@@ -1,0 +1,36 @@
+<div class="modal fade" id="userForm">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">User</h4>
+      </div>
+        <form action="{{ path('add-user') }}" method="POST">
+      <div class="modal-body">
+            <input type="hidden" name="user_id" value=""/>
+            <div class="form-group">
+                <input type="email" name="email" class="form-control" placeholder="Email Address" required/>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" class="form-control" placeholder="Password"/>
+            </div>
+            <div class="form-group">
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password"/>
+            </div>
+            <div class="form-group">
+                <select name="role" class="form-control">
+                    <option value="ROLE_USER">User</option>
+                    <option value="ROLE_ADMIN">Administrator</option>
+                </select>
+            </div>
+            <div class="alert alert-warning">
+            <i class="fa fa-fw fa-exclamation-triangle"></i> Leave the password empty if you don't want to change it.
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      </div>
+        </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

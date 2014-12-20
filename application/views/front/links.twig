@@ -1,0 +1,83 @@
+{% extends 'layout.twig' %}
+
+{% block styles %}
+	<link href="{{ baseUrl }}/css/style.css?v=2.1" rel="stylesheet">
+{% endblock %}
+
+
+{% block content %}
+<div class="col-lg-12 scraped-table-yest">
+{% if msg is not empty %}
+<div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ msg|trans }}</div>
+{% endif %}
+<h1>{{ title }}</h1>
+{% include 'front/includes/actions-btn.twig' %}
+<table id="scrapedTable" class="table table-bordered table-condensed table-hover main-table">
+		<thead>
+			<tr class="active">
+				<th>CODE</th>
+				<th>NAME</th>
+				<th>LINKS</th>
+				<th>LABEL</th>
+				<!-- <th>DATE</th> -->
+				<th>ACTIONS</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% if links|length > 0 %}
+				
+				{% for k, link in links %}
+				{% set status = (link.getViewStatus == 5) ? {1: "1", 2: "btn-default", 3: "Remove"} : { 1: "5", 2: "btn-danger", 3: "Restore"} %}
+				{% set statusBtn = (link.getViewStatus == 5) ? "btn-default" : "btn-danger" %}
+				{% set statusTitle = (link.getViewStatus == 5) ? "Remove" : "Restore" %}
+				
+				<tr id="-s{{ k }}" data-id="{{ link.getId }}">
+					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ link.getCode }}</td>
+					<td>{{ link.getName }}</td>
+					<td><a href="{{ link.getLink }}" target="_blank">{{ link.getLink }}</a></td>
+					<!--<td class="td-labels" data-labels="{{ link.getLabel }}">{{ link.getLabel|label_explode|raw }}</td>-->
+                    <td class="td-labels" data-labels="{{ labels[k][1] }}">{{  labels[k][0]|raw }}</td>
+					<!-- <td>{{ link.getCreatedAt|date("l, F j, Y") }}</td>-->
+					<td>
+						<div class="btn-group actions-btn">
+                    {% if role == 'ROLE_ADMIN' %}
+							<a href="#" class="edit-link btn btn-default btn-xs" data-toggle="modal" data-target="#newLink" data-type="1"><i class="fa fa-fw fa-pencil"></i></a>
+							<a 
+							href="{{ path('delete-link', {id: link.getId, type: status[1]}) }}" 
+							class="btn {{ status[2] }} btn-xs" data-toggle="tooltip" data-placement="top" title="{{ status[3] }}">
+								<i class="fa fa-trash-o"></i>
+							</a>
+                    {% elseif role == 'ROLE_USER' %}
+							<a href="#" class="edit-link btn btn-default btn-xs" data-toggle="modal" data-target="#newLink" data-type="2"><i class="fa fa-fw fa-pencil"></i></a>
+						</div>
+					</td>
+                    {% endif %}
+				</tr>
+				{% endfor %}
+
+			{% endif %}
+		<tbody>
+</table>
+
+<button class="btn btn-sm btn-info" data-toggle="modal" data-target="#newLink"><i class="fa fa-fw fa-link"></i> ADD LINK</button>
+<br/><br/><br/>
+</div>
+
+{% include 'front/includes/past-data.twig' %}
+{% include 'front/includes/add-link.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js?v=2.2"></script>
+<script>
+	$(document).ready(function(){
+		$('#scrapedTable').tablesorter({
+			 headers: {
+			 	5: {
+					sorter: false
+				},
+			 }
+		}); 
+	});
+</script>
+{% endblock %}

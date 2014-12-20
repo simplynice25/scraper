@@ -1,0 +1,74 @@
+{% extends 'layout.twig' %}
+
+{% block styles %}
+	<link href="{{ baseUrl }}/css/style.css?v=2.0" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    {% include 'front/includes/actions-btn.twig' %}
+    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#userForm" data-type="1"><i class="fa fa-fw fa-user"></i> New user</button>
+    <br/>
+    <br/>
+    {% if message is not empty %}
+        <div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ message|trans }}</div>
+    {% endif %}
+    <table class="table table-bordered table-condensed table-hover">
+        <thead>
+            <tr>
+                <th><i class="fa fa-fw fa-envelope-o"></i> Email</th>
+                <th><i class="fa fa-fw fa-user"></i> Role</th>
+                <th><i class="fa fa-fw fa-calendar"></i> Date Created</th>
+                <th><i class="fa fa-fw fa-wrench"></i> Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+        {% set role = (user.getRoles == 'ROLE_ADMIN') ? 'Administrator' : 'User' %}
+        {% set status = (user.getViewStatus == 5) ? { '1': 'btn-default', '2': '2', '3': 'Ban' } : { '1': 'btn-danger', '2': '5', '3': 'Unban' } %}
+            <tr class="{{ user.getId }}">
+                <td data-email="{{ user.getEmail }}">{{ user.getEmail }}</td>
+                <td data-role="{{ user.getRoles }}">{{ role }}</td>
+                <td>{{ user.getCreatedAt|date('l, F j, Y') }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-default btn-xs" data-toggle="modal" data-target="#userForm" data-type="2" {% if app.session.get('credential') == user.getEmail %}disabled {% endif %}><i class="fa fa-fw fa-pencil"></i></button>
+                        <a href="{{ path('ban-user', {id: user.getId, status: status['2']}) }}" {% if app.session.get('credential') == user.getEmail %}disabled {% endif %}class="btn {{ status['1'] }} btn-xs" data-toggle="tooltip" data-placement="top" title="{{ status['3'] }}"><i class="fa fa-fw fa-ban"></i></a>
+                        <a href="{{ path('ban-user', {id: user.getId, status: 1}) }}" class="btn btn-default btn-xs" {% if app.session.get('credential') == user.getEmail %}disabled {% endif %}><i class="fa fa-fw fa-trash-o"></i></a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% include 'dashboard/includes/user.form.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js"></script>
+<script>
+$(document).ready(function(){
+    $('a[data-toggle=tooltip]').tooltip();
+    
+    $('#userForm').on('shown.bs.modal', function(e){
+
+        $('input[name=email]').focus();
+        
+        if ($(e.relatedTarget).data('type') == 1)
+        {
+            $('#userForm .alert').hide();
+            $('#userForm form')[0].reset();
+            return true;
+        } else {
+            $('#userForm .alert').show();
+        }
+        
+        var _parent = $(e.relatedTarget).parent().parent().parent();
+        
+        $('input[name=user_id]').val(_parent.attr('class'));
+        $('input[name=email]').val(_parent.find('td[data-email]').data('email'));
+        $('select[name=role]').val(_parent.find('td[data-role]').data('role'));
+    })
+})
+</script>
+{% endblock %}

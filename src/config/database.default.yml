@@ -1,0 +1,7 @@
+database:
+    driver: pdo_mysql
+    host: localhost
+    dbname: palconitdatabase
+    user: root
+    password: root
+    charset: utf8

@@ -1,0 +1,29 @@
+#LINKS
+link_added: Link successfully added.
+invalid_url: URL is invalid.
+link_exist: Link exist.
+link_updated: Link successfully updated.
+link_deleted: Link successfully deleted.
+link_restore: Link successfully restored.
+label_added: Label successfully updated.
+
+#RESET PASSWORD
+invalid_email: Invalid Email Address.
+reset_sent: Email sent!
+reset_failed: Failed to send email, please try again.
+invalid_token: Invalid token.
+password_did_not_match: Password did not match.
+reset_pass_success: Password reset successful!
+
+#USERS
+ban_success: User successfully banned.
+restore_success: User successfully restored.
+deletion_success: User successfully deleted.
+invalid_id: Invalid ID.
+email_exist: Email Address is already in used.
+user_created_success: User successfully created.
+user_edit_success: User successfully updated.
+
+
+#SUBSCRIPTIONS
+subscription_updated: Subscription successfully updated.

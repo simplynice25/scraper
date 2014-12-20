@@ -1,0 +1,37 @@
+{% extends 'layout.twig' %}
+
+{% block content %}
+{% set noThrow = "The user provider must return a UserInterface object." %}
+{% set errLog =  (error == "Bad credentials") ? "Invalid email or password." : error %}
+<div class="col-lg-4 col-lg-offset-4" style="margin-top:30px">
+{% if message is not empty %}
+<div class="alert alert-info">{{ message|trans }}</div>
+{% endif %}
+<form role="form" action="{{ path('login_check') }}" method="POST">
+	<h2 class="form-signin-heading">Please sign in</h2>
+	<div class="form-group">
+		<input type="email" class="form-control" placeholder="Email address" name="_username" value="{{ last_username }}" required autofocus>
+	</div>
+	<div class="form-group">
+		<input type="password" name="_password" class="form-control" placeholder="Password" required>
+	</div>
+	<div class="form-group">
+		{{ '6Ldy3eISAAAAAM6A684vW00ijCK8Dj6HJ5w0DBE-'|captcha|raw }}
+	</div>
+
+	{% if err_ is not empty or error is not empty %}
+		<div class="alert alert-danger">
+			{% if errLog is not empty and errLog != noThrow %}<p>* {{ errLog }}</p>{% endif %}
+			{% if err_ is not empty %}<p>* {{ err_[0] }}</p>{% endif %}
+		</div>
+	{% endif %}
+	
+	<button class="btn btn-sm btn-block btn-primary" type="submit">Sign in</button>
+    <div class="text-center">
+        <a href="#" class="btn btn-link" data-toggle="modal" data-target="#forgotPassword">Forgot password?</a>
+    </div>
+</form>
+</div>
+
+{% include 'general/modal.forgot.password.twig' %}
+{% endblock %}

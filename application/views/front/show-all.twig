@@ -1,0 +1,30 @@
+{% extends 'layout.twig' %}
+
+{% block styles %}
+	<link href="{{ baseUrl }}/css/style.css?v=2.0" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="col-lg-12 scraped-table-yest">
+	<h1>{{ dataTitle }}</h1>
+	{% include 'front/includes/actions-btn.twig' %}
+	{% include 'front/appends/past-data.twig' %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js"></script>
+<script>
+	$(document).ready(function(){
+        /*
+		$('#scrapedTable2').tablesorter({
+			 headers: {
+			 	5: {
+					sorter: false
+				},
+			 }
+		});
+        */
+	});
+</script>
+{% endblock %}

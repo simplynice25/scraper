@@ -1,0 +1,31 @@
+{% set subscriptions = app.session.get('subscriptions') %}
+{% set sub_ = {'1' : 'Buy & Strong Buy alerts', '2' : 'Sell & Strong Sell alerts', '3' : 'Watchlist', '4' : 'Portfolio', '5' : 'Top 10 Actives / Gainers / Losers'} %}
+<!-- Past Data Modal -->
+<div class="modal fade" id="alertsModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title" id="myModalLabel">Subscribe</h4>
+      </div>
+      <form action="{{ path('subscribe-overview') }}" method="post">
+      <div class="modal-body">
+        <ul class="list-group">
+        {% for k, s in sub_ %}
+          <li class="list-group-item">
+            <span class="pull-right">
+                <input type="checkbox" name="subscribe[]" value="{{ k }}"{% if subscriptions[k] is defined %} checked{% endif %}/>
+            </span>
+            {{ s }}
+          </li>
+        {% endfor %}
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>

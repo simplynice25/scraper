@@ -1,0 +1,21 @@
+<!-- ACTIONS BTN -->
+<div class="row">
+	<div class="col-lg-12 show-btn">
+		<div class="btn-group">
+			<a href="{{ path('overview', {show: "24"}) }}" class="btn btn-sm btn-success"><i class="fa fa-fw fa-eye fa-money"></i> BUY ALERTS</a>
+			<a href="{{ path('overview', {show: "13"}) }}" class="btn btn-sm btn-danger"><i class="fa fa-fw fa-eye fa-dollar"></i> SELL ALERTS</a>
+			<a href="{{ path('overview', {show: "00", view: 1}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-list"></i> WATCHLIST</a>
+			<a href="{{ path('overview', {show: "00", view: 2}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-file-powerpoint-o"></i> PORTFOLIO</a>
+			<a href="{{ path('overview', {show: "00", view: 3}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-eye-slash"></i> HIDDEN</a>
+			<a href="{{ path('overview', {show: "00"}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-eye"></i> VIEW ALL</a>
+			<a href="{{ path('actives-losers-gainers') }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-bar-chart"></i> ACTIVES/GAINERS/LOSERS</a>
+			<a href="{{ path('show-links') }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-link"></i> SYM INFO</a>
+			<!-- <a href="{{ path('logout') }}" class="pull-right btn btn-sm sign-out-btn"><i class="fa fa-fw fa-power-off"></i> SIGN OUT</a> -->
+		</div>
+	{% if title == 'Links' %}
+	<br/><br/>
+	<button class="btn btn-sm btn-info" data-toggle="modal" data-target="#newLink"><i class="fa fa-fw fa-link"></i> ADD LINK</button>
+	{% endif %}
+	</div>
+</div>
+<!-- ACTIONS BTN OFF -->
