@@ -45,7 +45,19 @@
                 <span>TRADED: {{ traded|number_format }}</span>
 			</td>
 			<td>{{ scrape.getOpenTotal }}</td>
-			<td>{{ scrape.getCloseTotal }}</td>
+			<td>
+                {{ scrape.getCloseTotal }}
+                {#
+                <br/>
+                <span>52H: {{ scrape.getWkHighRange }}</span>
+                <br/>
+                <span>52L: {{ scrape.getWkLowRange }}</span>
+                <br/>
+                <span>P/E: {{ scrape.getPeRatio }}</span>
+                <br/>
+                <span>EPS: {{ scrape.getEps }}</span>
+                #}
+            </td>
 			<td>{{ scrape.getHighRange }}</td>
 			<td>{{ scrape.getLowRange }}</td>
 		</tr>

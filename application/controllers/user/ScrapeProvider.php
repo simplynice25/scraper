@@ -171,7 +171,7 @@ class ScrapeProvider
 		
 		return "OK";
 	}
-    
+
     public function homeExtract($app, $data, $scraped)
     {
         $wkRange = $data->find('div.overviewDataTable div.inlineblock span.float_lang_base_2', 4)->plaintext;
@@ -179,8 +179,11 @@ class ScrapeProvider
         $peRatio = $data->find('div.overviewDataTable div.inlineblock span.float_lang_base_2', 10)->plaintext;
         $wkRange = explode(' - ', $wkRange);
         
-        $scraped->setWkHighRange(($wkRange[0] > $wkRange[1]) ? $wkRange[0] : $wkRange[1]);
-        $scraped->setWkLowRange(($wkRange[0] < $wkRange[1]) ? $wkRange[0] : $wkRange[1]);
+        $one_ = (float) $wkRange[0];
+        $two_ = (float) $wkRange[1];
+        
+        $scraped->setWkHighRange(($one_ > $two_) ? $one_ : $two_);
+        $scraped->setWkLowRange(($one_ < $two_) ? $one_ : $two_);
         $scraped->setPeRatio($peRatio);
         $scraped->setEps($eps);
 		$scraped->setModifiedAt("now");

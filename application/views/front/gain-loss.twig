@@ -40,7 +40,17 @@
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-                    <td data-value="{{ data.getCloseTotal }}">{{ data.getCloseTotal|number_format(2, '.', ',') }}</td>
+                    <td data-value="{{ data.getCloseTotal }}">
+                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+                        <br/>
+                        <span>52H: {{ data.getWkHighRange }}</span>
+                        <br/>
+                        <span>52L: {{ data.getWkLowRange }}</span>
+                        <br/>
+                        <span>P/E: {{ data.getPeRatio }}</span>
+                        <br/>
+                        <span>EPS: {{ data.getEps }}</span>
+                    </td>
 					<td data-value="{{ data.getVolume }}">{{ data.getVolume|number_format }}</td>
 					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
 						{{ summ[1] }} ({% if data.getChangePercent > 0 %}+{% endif %}{{ data.getChangePercent }}%)
@@ -88,7 +98,17 @@
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-					<td data-value="{{ data.getCloseTotal }}">{{ data.getCloseTotal|number_format(2, '.', ',') }}</td>
+					<td data-value="{{ data.getCloseTotal }}">
+                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+                        <br/>
+                        <span>52H: {{ data.getWkHighRange }}</span>
+                        <br/>
+                        <span>52L: {{ data.getWkLowRange }}</span>
+                        <br/>
+                        <span>P/E: {{ data.getPeRatio }}</span>
+                        <br/>
+                        <span>EPS: {{ data.getEps }}</span>
+                    </td>
 					<td class="green-txt">+{{ data.getChangePercent }}%</td>
 					<!--<td>{{ data.getVolume|number_format(2, '.', ',') }}</td>-->
 					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
@@ -136,7 +156,17 @@
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-					<td data-value="{{ data.getCloseTotal }}">{{ data.getCloseTotal|number_format(2, '.', ',') }}</td>
+					<td data-value="{{ data.getCloseTotal }}">
+                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+                        <br/>
+                        <span>52H: {{ data.getWkHighRange }}</span>
+                        <br/>
+                        <span>52L: {{ data.getWkLowRange }}</span>
+                        <br/>
+                        <span>P/E: {{ data.getPeRatio }}</span>
+                        <br/>
+                        <span>EPS: {{ data.getEps }}</span>
+                    </td>
 					<td class="red-txt">{{ data.getChangePercent }}%</td>
 					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
 						{{ summ[1] }} ({% if data.getChangePercent > 0 %}+{% endif %}{{ data.getChangePercent }}%)
