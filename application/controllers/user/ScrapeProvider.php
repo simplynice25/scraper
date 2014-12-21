@@ -17,7 +17,7 @@ class ScrapeProvider
 	
 	public function __construct()
 	{
-		$this->per_scrape = 50;
+		$this->per_scrape = 20;
 	}
 
 	public static function routing(Application $app)
@@ -69,7 +69,7 @@ class ScrapeProvider
 
 	public function index(Application $app)
 	{
-		$dump = array();
+		//$dump = array();
 		ini_set('memory_limit', '-1');
 		ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0');
 		include( __DIR__ . '/../../plugins/simplehtmldom/simple_html_dom.php');
@@ -97,7 +97,9 @@ class ScrapeProvider
 		
 		foreach($links as $k => $l)
 		{
-			$data = file_get_html(urldecode($l->getLink()));
+            $url_ = urldecode($l->getLink());
+            $home = file_get_html(str_replace('-technical', '', $url_));
+			$data = file_get_html($url_);
             
             $code = $l->getCode();
             $abbr = (empty($code)) ? self::extractParenthesis($data->find('h1.[itemprop=name]', 0)->innertext) : $code;
@@ -138,11 +140,15 @@ class ScrapeProvider
 
 			$app['orm.em']->persist($scraped);
 			$app['orm.em']->flush();
+            
+            self::homeExtract($app, $home, $scraped);
 			
-			$dump[] = $scraped;
+			//$dump[] = $scraped;
 
 			// clean up memory
+            $home->clear();
 			$data->clear();
+            unset($home);
 			unset($data);
 		}
 
@@ -160,11 +166,30 @@ class ScrapeProvider
 		$app['orm.em']->persist($lastScraped);
 		$app['orm.em']->flush();
 		
-		echo '<pre>';
-		print_r($dump);
+		//echo '<pre>';
+		//print_r($dump);
 		
 		return "OK";
 	}
+    
+    public function homeExtract($app, $data, $scraped)
+    {
+        $wkRange = $data->find('div.overviewDataTable div.inlineblock span.float_lang_base_2', 4)->plaintext;
+        $eps = $data->find('div.overviewDataTable div.inlineblock span.float_lang_base_2', 5)->plaintext;
+        $peRatio = $data->find('div.overviewDataTable div.inlineblock span.float_lang_base_2', 10)->plaintext;
+        $wkRange = explode(' - ', $wkRange);
+        
+        $scraped->setWkHighRange(($wkRange[0] > $wkRange[1]) ? $wkRange[0] : $wkRange[1]);
+        $scraped->setWkLowRange(($wkRange[0] < $wkRange[1]) ? $wkRange[0] : $wkRange[1]);
+        $scraped->setPeRatio($peRatio);
+        $scraped->setEps($eps);
+		$scraped->setModifiedAt("now");
+		
+		$app['orm.em']->persist($scraped);
+		$app['orm.em']->flush();
+        
+        return TRUE;
+    }
 	
 	public static function extractParenthesis($str, $remove = NULL)
 	{

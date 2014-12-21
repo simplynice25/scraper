@@ -15,7 +15,7 @@
 <table id="scrapedTable" class="table table-bordered table-condensed table-hover main-table">
 		<thead>
 		<tr class="active">
-            <th>#</th>
+            {#<th>#</th>#}
 			<th>SYM</th>
 			<th>PRICE</th>
 			{% if view == 2 %}<th>GAIN/LOSS SINCE</th>{% endif %}
@@ -43,9 +43,19 @@
 		{% set dataLeft = scrape|length %}
 
 		<tr>
-            <td>{{k}}</td>
+            {#<td>{{k}}</td>#}
 			<td class="abbr" data-toggle="modal" data-target="#pastData">{{ scrape[0].getAbbr }}</td>
-			<td data-value="{{ scrape[0].getCloseTotal }}">{{ scrape[0].getCloseTotal|number_format(2, '.', ',') }}</td>
+			<td data-value="{{ scrape[0].getCloseTotal }}">
+                {{ scrape[0].getCloseTotal|number_format(2, '.', ',') }}
+                <br/>
+                <span>52H: {{ scrape[0].getWkHighRange }}</span>
+                <br/>
+                <span>52L: {{ scrape[0].getWkLowRange }}</span>
+                <br/>
+                <span>P/E: {{ scrape[0].getPeRatio }}</span>
+                <br/>
+                <span>EPS: {{ scrape[0].getEps }}</span>
+            </td>
 			
 			{% if view == 2 %}
 			{% set gainLoss = ( ( scrape[0].getCloseTotal / sinceClose[k][0] ) - 1 ) * 100 %}

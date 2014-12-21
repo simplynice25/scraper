@@ -12,7 +12,7 @@ define('CSV_EMAIL', __DIR__ . '/csv/email');
 include_once('settings.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-$app_debug = TRUE;
+$app_debug = FALSE;
 $app = new Silex\Application();
 
 $app['debug'] = $app_debug;
