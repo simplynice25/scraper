@@ -1,0 +1,104 @@
+{% extends 'layout.twig' %}
+
+{% block styles %}
+    <link href="{{ baseUrl }}/css/style.css?v=2.0" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    {% include 'front/includes/actions-btn.twig' %}
+    <button class="btn btn-info btn-sm new-skip-date" data-toggle="modal" data-target="#newSkipDate" data-type="1"><i class="fa fa-fw fa-calendar"></i> New date</button>
+    <br/>
+    <br/>
+    {% if message is not empty %}
+        <div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ message|trans }}</div>
+    {% endif %}
+    {% if dates is defined and dates|length > 0 %}
+    <table class="table table-bordered table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>Dates</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for k, date in dates %}
+            <tr>
+                <td>{{ date.getSkipDate|date('l, F d Y') }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-default btn-xs edit-skip-date" 
+                        data-skip-date="{{ date.getSkipDate|date('Y-m-d') }}"
+                        data-skip-date-id="{{ date.getId }}" data-toggle="modal" data-target="#newSkipDate">
+                            <i class="fa fa-fw fa-pencil"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% include 'dashboard/includes/date.form.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js"></script>
+<script>
+$(document).ready(function() {
+    
+    var addSkipDate = $('.add-skip-date').parent();
+
+    $('.add-skip-date').click(function(){
+        var self = $(this),
+            date = $('.date:first'),
+            cloned = date.parent().clone();
+
+            cloned.children('input[type=date]').val('');
+
+            date.parent().parent().append(cloned);
+    });
+
+    $('.remove-skip-date').click(function(){
+        if ($('.date').length > 1)
+        {
+            $('.date:last').remove();
+        }
+    });
+
+    $('.new-skip-date').click(function(){
+        addSkipDate.show();
+        $('.date').val('');
+    });
+
+    $('.edit-skip-date').click(function(e){
+        var self = $(this),
+            date = $('.date:last-child');
+
+        date.parent().nextAll().remove();
+
+        $('.date').val(self.data('skip-date'));
+        $('input[name=date_id]').val(self.data('skip-date-id'));
+
+        addSkipDate.hide();
+    });
+})
+
+function dateToday()
+{
+    var today = new Date(),
+        dd = today.getDate(),
+        mm = today.getMonth()+1,
+        yyyy = today.getFullYear();
+
+    if(dd<10) {
+        dd='0'+dd
+    } 
+
+    if(mm<10) {
+        mm='0'+mm
+    } 
+
+    return today = yyyy+'-'+mm+'-'+dd;
+}
+</script>
+{% endblock %}

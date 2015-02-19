@@ -1,0 +1,58 @@
+SSH:
+97.74.182.128
+palconit
+MQjauFh9Mz#
+
+TOUCHED:
+
+ASSETS:
+css/style.css
+
+TWIG:
+general/msg.forgot.password.twig
+general/msg.register.twig
+front/index.twig
+front/includes/list.scraped.admin.twig
+front/includes/list.scraped.user.twig
+front/includes/actions-btn.twig
+front/includes/menu.modal.twig
+front/gain-loss.twig
+front/appends/past-data.twig
+front/links.twig
+registration.twig
+layout.twig
+front/show-all.twig
+
+MODELS:
+Scrape.php
+
+CONTROLLERS:
+UserProvider.php
+ScrapeProvider.php
+
+PLUGINS:
+
+
+
+
+
+http://members.fuckingawesome.com/
+fiskekaka:mjoff42
+jimb007:andrew
+
+Here is the database
+https://p3nlmysqladm001.secureserver.net/grid50/15/index.php?lang=en-iso-8859-1&token=972c81138672e9425e11745254b3b805
+username/dbname palconitdatabase
+password P@@7dbase
+host palconitdatabase.db.4865641.hostedresource.com
+paki add ng prefix psemonitor_
+
+wget -q -O - http://palconit.com/pse/web/scrape/ >/dev/null 2>&1
+curl -L -s http://palconit.com/pse/web/scrape/ >/dev/null 2>&1
+
+To test admin role:
+	email - admin@psemonitor.com
+	password - psep@55w0rd
+To test user role:
+	email - simplyniceweb@gmail.com
+	password - passwordxxx

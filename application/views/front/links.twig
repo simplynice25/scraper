@@ -10,33 +10,38 @@
 {% if msg is not empty %}
 <div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ msg|trans }}</div>
 {% endif %}
-<h1>{{ title }}</h1>
+<h1 class="heading">{{ title }}</h1>
 {% include 'front/includes/actions-btn.twig' %}
 <table id="scrapedTable" class="table table-bordered table-condensed table-hover main-table">
 		<thead>
 			<tr class="active">
+            	<th>#</th>
 				<th>CODE</th>
 				<th>NAME</th>
-				<th>LINKS</th>
+				{#<th>LINK</th>#}
 				<th>LABEL</th>
-				<!-- <th>DATE</th> -->
+				<th>SECTOR</th>
+				<th>SUB-SECTOR</th>
 				<th>ACTIONS</th>
 			</tr>
 		</thead>
 		<tbody>
 			{% if links|length > 0 %}
-				
+				{% set count = 1 %}
 				{% for k, link in links %}
 				{% set status = (link.getViewStatus == 5) ? {1: "1", 2: "btn-default", 3: "Remove"} : { 1: "5", 2: "btn-danger", 3: "Restore"} %}
 				{% set statusBtn = (link.getViewStatus == 5) ? "btn-default" : "btn-danger" %}
 				{% set statusTitle = (link.getViewStatus == 5) ? "Remove" : "Restore" %}
+				{% set sector = link.getCategory~'-sector' %}
 				
-				<tr id="-s{{ k }}" data-id="{{ link.getId }}">
+				<tr id="-s{{ k }}" data-id="{{ link.getId }}" data-category="{{ link.getCategory }}">
+					<td>{{count}}</td>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ link.getCode }}</td>
 					<td>{{ link.getName }}</td>
-					<td><a href="{{ link.getLink }}" target="_blank">{{ link.getLink }}</a></td>
+					{#<td><a href="{{ link.getLink }}" target="_blank">{{ link.getLink }}</a></td>#}
                     <td class="td-labels" data-labels="{{ labels[k][1] }}">{{  labels[k][0]|raw }}</td>
-					<!-- <td>{{ link.getCreatedAt|date("l, F j, Y") }}</td>-->
+                    <td><a href="{{ link.getLink }}" target="_blank">{{ sector|categories|raw }}</a></td>
+					<td><a href="{{ link.getLink }}" target="_blank">{{ link.getCategory|categories|raw }}</a></td>
 					<td>
 						<div class="btn-group actions-btn">
                     {% if role == 'ROLE_ADMIN' %}
@@ -52,6 +57,7 @@
 					</td>
                     {% endif %}
 				</tr>
+				{% set count = count + 1 %}
 				{% endfor %}
 
 			{% endif %}
@@ -72,7 +78,7 @@
 	$(document).ready(function(){
 		$('#scrapedTable').tablesorter({
 			 headers: {
-			 	5: {
+			 	6: {
 					sorter: false
 				},
 			 }

@@ -8,11 +8,6 @@
       </div>
       <form name="link-action" action="{{ path('link-action') }}" data-href="{{ path('link-action') }}" method="POST">
       <div class="modal-body">
-	    <!--
-	  	<div class="form-group">
-	  		<button type="button" class="new-link-btn btn btn-sm btn-info"><i class="fa fa-fw fa-plus"></i> More link ..</button>
-		</div>
-		-->
 		<div class="form-group">
 			<label for="code"><small>Code</small></label>
 			<input type="text" id="code" class="form-control" name="code" value="" placeholder="YEHEY" required/>
@@ -23,15 +18,67 @@
 		</div>
 		<div class="form-group">
 			<label for="link"><small>Link</small></label>
-			<!--<div class="input-group">-->
 			<input type="text" id="link" class="form-control" name="link" value="" placeholder="e.g. http://www.investing.com/equities/yehey-corp-technical" required/>
-			<!--<span class="input-group-addon new-link-remove"><i class="fa fa-fw fa-times"></i></span>
-			</div>-->
 		</div>
 		<div class="form-group">
 			<label for="label"><small>Label</small></label><br/>
-			<input type="text" id="label" data-role="tagsinput" class="form-control" name="label" value="" required/>
+			<input type="text" id="label" data-role="tagsinput" class="form-control" name="label" value=""/> <!--  required -->
 		</div>
+		{% if app.session.get('is_granted') == 'ROLE_ADMIN' %}
+		<div class="form-group">
+			<label for="category"><small>Category</small></label><br/>
+			<select name="category" id="category" class="form-control">
+			<option value="0">Select Category</option>
+			<optgroup label="Financials">
+				<option value="11">Banks</option>
+				<option value="12">Other Financials</option>
+			</optgroup>
+			<optgroup label="Industrial">
+				<option value="21">Electricity, Energy, Power &amp; Water</option>
+				<option value="22">Food, Beverage &amp; Tobacco</option>
+				<option value="23">Construction, Infrastructure &amp; Allied Services</option>
+				<option value="24">Chemicals</option>
+				<option value="25">Electrical Components &amp; Equipment</option>
+				<option value="26">Other Industrials</option>
+			</optgroup>
+			<optgroup label="Holding Firms">
+				<option value="31">Holdings</option>
+			</optgroup>
+			<optgroup label="Property">
+				<option value="41">Property</option>
+			</optgroup>
+			<optgroup label="Services">
+				<option value="51">Media</option>
+				<option value="52">Telecommunications</option>
+				<option value="53">Information Technology</option>
+				<option value="54">Transportation Services</option>
+				<option value="55">Hotel &amp; Leisure</option>
+				<option value="56">Education</option>
+				<option value="57">Casinos &amp; Gaming</option>
+				<option value="58">Retail</option>
+				<option value="59">Other Services</option>
+			</optgroup>
+			<optgroup label="Mining &amp; Oil">
+				<option value="61">Mining</option>
+				<option value="62">Oil</option>
+			</optgroup>
+			<optgroup label="Small And Medium Enterprises">
+				<option value="71">SMES</option>
+			</optgroup>
+			<optgroup label="Exchange Traded Funds">
+				<option value="81">ETFS</option>
+			</optgroup>
+			<optgroup label="Warrants">
+				<option value="91">Warrants</option>
+			</optgroup>
+			{#
+			<optgroup label="PSE Composite Index">
+				<option value="91">PSEi</option>
+			</optgroup>
+			#}
+			</select>
+		</div>
+		{% endif %}
 		<input type="hidden" name="id" value=""/>
       </div>
       <div class="modal-footer">

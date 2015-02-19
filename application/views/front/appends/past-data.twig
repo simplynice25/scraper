@@ -1,3 +1,22 @@
+{% if app.session.get('is_granted') == 'ROLE_ADMIN' %}
+<img src="http://www.bloomberg.com/apps/chart?timeout=10&h={{wh[0]}}&w={{wh[1]}}&type=gp_line2&range=3m&ticks={{abbr}}:PM&cfg=ChartBuilderVol_bw.xml&img=png"/>
+{% elseif app.session.get('is_granted') == 'ROLE_USER' %}
+    {% set wkhigh = (scrapes is defined and scrapes|length > 0) ? scrapes[0].getWkHighRange : 'N/A' %}
+    {% set wklow = (scrapes is defined and scrapes|length > 0) ? scrapes[0].getWkLowRange : 'N/A' %}
+    {% set peRatio = (scrapes is defined and scrapes|length > 0) ? scrapes[0].getPeRatio : 'N/A' %}
+    {% set epsRatio = (scrapes is defined and scrapes|length > 0) ? scrapes[0].getEps : 'N/A' %}
+    <p>
+        <b>52WK HIGH: </b>{{ wkhigh }}&nbsp;&nbsp;
+        <b>52WK LOW: </b>{{ wklow }}&nbsp;&nbsp;
+        <b>P/E RATIO: </b>{{ peRatio }}&nbsp;&nbsp;
+        <b>EPS RATIO: </b>{{ epsRatio }}&nbsp;&nbsp;
+    </p>
+    <p>
+        <b>COMPANY PROFILE: </b><a href="http://www.bloomberg.com/profiles/companies/{{abbr}}:PM" target="_blank"><small>Link&nbsp;<i class="fa fa-fw fa-external-link"></i></small></a>
+        <b>LATEST NEWS: </b><a href="http://www.bookaka.com/Home/Company/{{abbr}}" target="_blank"><small>Link&nbsp;<i class="fa fa-fw fa-external-link"></i></small></a>
+        <b>TECHNICAL ANALYSIS: </b><a href="{{link.getLink}}" target="_blank"><small>Link&nbsp;<i class="fa fa-fw fa-external-link"></i></small></a>
+    </p>
+{% endif %}
 <span class="past-data-title" data-title="{{ dataTitle }}" style="display:none">{{ dataTitle }}</span>
 <table id="scrapedTable2" class="table table-bordered table-condensed table-hover main-table">
 		<thead>
@@ -29,11 +48,12 @@
 		{% elseif scrape.getSummary == 5 %}
 			{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
 		{% endif %}
-                
-        {% set traded = scrape.getVolume*scrape.getCloseTotal %}
+        
+        {% set latestPrice = scrape.getCloseTotal %}
+        {% set traded = scrape.getVolume*latestPrice %}
 		<tr>
             <td>{{ scrape.getCreatedAt|date("Y/m/d") }}</td>
-			<td class="{{ summ[0] }}">
+			<td class="{{ summ[0] }}" data-traded="{{traded}}">
 				{{ summ[1] }} ({% if scrape.getChangePercent > 0 %}+{% endif %}{{ scrape.getChangePercent }}%)
 				<br/>
 				<span>MA: {{ scrape.getMovingAverages }} of {{ scrape.getMovingAveragesTotal }}</span>
@@ -46,7 +66,16 @@
 			</td>
 			<td>{{ scrape.getOpenTotal }}</td>
 			<td>
-                {{ scrape.getCloseTotal }}
+                {{ latestPrice }}
+                {#
+                <br/>
+                {% if latestPrice == scrape.getWkHighRange %}
+                <span>ALL TIME HIGH</span><br/>
+                {% endif %}
+                {% if latestPrice == scrape.getWkLowRange %}
+                <span>ALL TIME LOW</span><br/>
+                {% endif %}
+                #}
                 {#
                 <br/>
                 <span>52H: {{ scrape.getWkHighRange }}</span>

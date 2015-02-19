@@ -1,5 +1,8 @@
 /* CSS Document */
-html, body {padding-top:30px;}
+html, body {padding-top:30px; font-family: tahoma; font-size: 11px}
+img.logo {height:50px;max-width:220px}
+li.help-msg-paypal a{color:red !important;padding-right: 0}
+.heading { font-size: 14px;font-weight: bold;font-family: tahoma;}
 
 /* Actions Btn */
 .show-btn {
@@ -44,18 +47,18 @@ html, body {padding-top:30px;}
 .abbr {
 	cursor: pointer
 }
-.summ-sell, .summ-strong-sell, .summ-buy, .summ-strong-buy, .summ-neutral, 
+.summ-sell, .summ-strong-sell, .summ-buy, .summ-strong-buy, .summ-neutral,
 .summ-sell:hover, .summ-strong-sell:hover, .summ-buy:hover, .summ-strong-buy:hover, .summ-neutral:hover {
 	color: #FFF;
 	cursor: default;
 }
-.summ-sell, .summ-strong-sell, .summ-buy, .summ-strong-buy, .summ-neutral, .summ-null {
+.summ-sell, .summ-strong-sell, .summ-buy, .summ-strong-buy, .summ-neutral, .summ-null, .price {
 	font-size:11px;
 }
-.summ-neutral {
+.summ-neutral, #menuModal .btn-neutral {
 	background-color: #ACACAC
 }
-	.summ-neutral:hover {
+	.summ-neutral:hover, #menuModal .btn-neutral:hover {
 		background-color: #7A7A7A
 	}
 .summ-sell {
@@ -64,10 +67,10 @@ html, body {padding-top:30px;}
 	.summ-sell:hover {
 		background-color: #eb0202
 	}
-.summ-strong-sell {
+.summ-strong-sell, #menuModal .btn-sell {
 	background-color: #c00000;
 }
-	.summ-strong-sell:hover {
+	.summ-strong-sell:hover, #menuModal .btn-sell:hover {
 		background-color: #a70101
 	}
 .summ-buy {
@@ -76,10 +79,10 @@ html, body {padding-top:30px;}
 	.summ-buy:hover {
 		background-color: #7eb840
 	}
-.summ-strong-buy {
+.summ-strong-buy, #menuModal .btn-buy {
 	background-color: #00b050
 }
-	.summ-strong-buy:hover {
+	.summ-strong-buy:hover, #menuModal .btn-buy:hover {
 		background-color: #019243
 	}
 .red-txt {
@@ -90,4 +93,34 @@ html, body {padding-top:30px;}
 }
 .black-txt {
 	color: #000
+}
+
+
+/* Menu modal */
+#menuModal h4.title-buy {
+	color: #00b050
+}
+#menuModal h4.title-sell {
+	color: #c00000
+}
+#menuModal h4.title-neutral {
+	color: #333
+}
+#menuModal .btn-buy, #menuModal .btn-sell, #menuModal .btn-neutral,
+#menuModal .btn-buy:hover, #menuModal .btn-sell:hover, #menuModal .btn-neutral:hover {
+	color: #FFF;
+	cursor: pointer;
+}
+#menuModal h5 {
+	font-weight: bold;
+}
+#menuModal ul {
+	/*list-style-type: none*/
+}
+#menuModal ul li a {
+	color: #333;
+}
+#menuModal ul li a:hover {
+	color: #619def;
+	text-decoration: underline;
 }

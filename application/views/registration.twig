@@ -1,0 +1,51 @@
+{% extends 'layout.twig' %}
+
+{% block styles %}
+    <style type="text/css">
+        #recaptcha_area,
+        #recaptcha_table {
+            margin: 0 auto;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+<div class="col-lg-4 col-lg-offset-4" style="margin-top:30px">
+    {% if message is not empty %}
+        <div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ message|trans }}</div>
+    {% endif %}
+    <img src="{{ path('login') }}img/logo.png" class="img-responsive" style="max-width:360px;height:100"/>
+    <form role="form" action="{{ path('registration-process') }}" method="POST">
+        <div class="form-group">
+            <label for="email"><small>Email address</small></label>
+            <input id="email" type="email" class="form-control" placeholder="Email address" name="email" required autofocus>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="password"><small>Password</small></label>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <label for="confirm_password"><small>Confirm Password</small></label>
+                    <input id="confirm_password" type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            {{ '6Ldy3eISAAAAAM6A684vW00ijCK8Dj6HJ5w0DBE-'|captcha|raw }}
+        </div>
+        <div class="alert alert-warning">
+            <p style="font-size:10px">PSE Monitor will not accept any liability for loss or damage as a result of reliance on the information contained within this website including data, quotes, charts and buy/sell signals. Please be fully informed regarding the risks and costs associated with trading the financial markets, it is one of the riskiest investment forms possible. Before deciding to trade foreign exchange or any other financial instrument you should carefully consider your investment objectives, level of experience, and risk appetite. PSE Monitor would like to remind you that the data contained in this website is neither necessarily real-time nor accurate. Prices may not be accurate and may differ from the actual market price, meaning prices are indicative and not appropriate for trading purposes. Therefore PSE Monitor doesn’t bear any responsibility for any trading losses you might incur as a result of using this data.</p>
+        </div>
+        <button class="btn btn-block btn-primary" type="submit">AGREE, SIGN ME UP</button>
+        <div class="text-center col-lg-12">
+            <a href="{{ path('login') }}" class="btn btn-link">Login</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

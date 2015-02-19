@@ -1,14 +1,24 @@
 <!-- ACTIONS BTN -->
+{% set sectors = { '1': 'Financials', '2': 'Industrial', '3': 'Holding Firms', '4': 'Property', '5': 'Services', '6': 'Mining &amp; Oil', '7': 'Small And Medium Enterprises', '8': 'Exchange Traded Funds', '9': 'Warrants' } %}
+{% set subsectors = [{'11': 'Banks','12':'Other Financials'},{'21': 'Electricity, Energy, Power &amp; Water', '22': 'Food, Beverage &amp; Tobacco', '23': 'Construction, Infrastructure &amp; Allied Services', '24': 'Chemicals', '25': 'Electrical Components &amp; Equipment', '26': 'Other Industrials'},{'31':'Holdings'},{'41':'Property'},{'51':'Media','52':'Telecommunications','53':'Information Technology','54':'Transportation Services','55':'Hotel & Leisure','56':'Education','57':'Casinos & Gaming','58':'Retail','59':'Other Services'},{'61':'Mining','62':'Oil'},{'71':'SMES'},{'81':'ETFS'},{'91':'Warrants'}] %}
 <div class="row">
 	<div class="col-lg-12 show-btn">
 		<div class="btn-group">
-			<a href="{{ path('overview', {show: "24"}) }}" class="btn btn-sm btn-success"><i class="fa fa-fw fa-eye fa-money"></i> BUY ALERTS</a>
-			<a href="{{ path('overview', {show: "13"}) }}" class="btn btn-sm btn-danger"><i class="fa fa-fw fa-eye fa-dollar"></i> SELL ALERTS</a>
+			<a href="javascript:;" class="btn btn-sm btn-default" data-menu='{"url":"{{ path('overview', {show: "00"}) }}","txt":"VIEW ALL","btn":"btn-neutral","color":"title-neutral"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-home"></i> HOME</a>
+			{% if app.session.get('is_granted') == "ROLE_ADMIN" %}
+			<a href="javascript:;" class="btn btn-sm btn-success" data-menu='{"url":"{{path('overview', {show: "24"})}}","txt":"BUY ALERTS","btn":"btn-buy","color":"title-buy"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-eye fa-money"></i> BUY ALERTS</a>
+			<a href="javascript:;" class="btn btn-sm btn-danger" data-menu='{"url":"{{path('overview', {show: "13"})}}","txt":"SELL ALERTS","btn":"btn-sell","color":"title-sell"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-eye fa-dollar"></i> SELL ALERTS</a>
+			{% endif %}
+			{% if role == "ROLE_USER" %}
 			<a href="{{ path('overview', {show: "00", view: 1}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-list"></i> WATCHLIST</a>
-			<a href="{{ path('overview', {show: "00", view: 2}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-file-powerpoint-o"></i> PORTFOLIO</a>
-			<a href="{{ path('overview', {show: "00", view: 3}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-eye-slash"></i> HIDDEN</a>
-			<a href="{{ path('overview', {show: "00"}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-eye"></i> VIEW ALL</a>
-			<a href="{{ path('actives-losers-gainers') }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-bar-chart"></i> ACTIVES/GAINERS/LOSERS</a>
+			<a href="{{ path('overview', {show: "00", view: 2}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-list"></i> PORTFOLIO</a>
+			<a href="{{ path('overview', {show: "00", view: 3}) }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-list"></i> HIDDEN</a>
+			{% elseif role == "ROLE_ADMIN" %}
+			<a href="javascript:;" class="btn btn-sm btn-default" data-menu='{"url":"{{ path('overview', {show: "00", view: 1}) }}","txt":"WATCHLIST","btn":"btn-neutral","color":"title-neutral"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-list"></i> WATCHLIST</a>
+			<a href="javascript:;" class="btn btn-sm btn-default" data-menu='{"url":"{{ path('overview', {show: "00", view: 2}) }}","txt":"PORTFOLIO","btn":"btn-neutral","color":"title-neutral"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-file-powerpoint-o"></i> PORTFOLIO</a>
+			<a href="javascript:;" class="btn btn-sm btn-default" data-menu='{"url":"{{ path('overview', {show: "00", view: 3}) }}","txt":"HIDDEN","btn":"btn-neutral","color":"title-neutral"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-eye-slash"></i> HIDDEN</a>
+			{% endif %}
+			<a href="javascript:;" class="btn btn-sm btn-default" data-menu='{"url":"{{ path('actives-losers-gainers', {show: "00"}) }}","txt":"ACTIVES/GAINERS/LOSERS","btn":"btn-neutral","color":"title-neutral"}' data-toggle="modal" data-target="#menuModal"><i class="fa fa-fw fa-bar-chart"></i> ACTIVES/GAINERS/LOSERS</a>
 			<a href="{{ path('show-links') }}" class="btn btn-sm btn-default"><i class="fa fa-fw fa-link"></i> SYM INFO</a>
 			<!-- <a href="{{ path('logout') }}" class="pull-right btn btn-sm sign-out-btn"><i class="fa fa-fw fa-power-off"></i> SIGN OUT</a> -->
 		</div>
@@ -18,4 +28,5 @@
 	{% endif %}
 	</div>
 </div>
+{% include 'front/includes/menu.modal.twig' with {'sectors': sectors, 'subsectors': subsectors} %}
 <!-- ACTIONS BTN OFF -->

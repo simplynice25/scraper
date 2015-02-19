@@ -28,7 +28,9 @@ class SubscribeProvider
             $this->csvPath . "/Sell & Strong Sell alerts ( $now ).csv", 
             $this->csvPath . "/Watchlist ( $now ).csv", 
             $this->csvPath . "/Portfolio ( $now ).csv", 
-            $this->csvPath . "/Top 10 Actives-Gainers-Losers ( $now ).csv"
+            $this->csvPath . "/Top 10 Actives-Gainers-Losers ( $now ).csv", 
+            $this->csvPath . "/Watchlist ( $now )", 
+            $this->csvPath . "/Portfolio ( $now )", 
         );
     }
     
@@ -57,8 +59,10 @@ class SubscribeProvider
                 unlink($file);
         }
         
-        foreach ($this->csv as $csv)
+        foreach ($this->csv as $k => $csv)
         {
+            if ($k == 5) break;
+            if ($k == 2 || $k == 3) continue;
             $file_ = @fopen($csv, "w");
             @fclose($file_);
         }
@@ -67,8 +71,8 @@ class SubscribeProvider
         $data['sb'][0] = self::sellBuy($req, $app, 13); // Sell & Strong Sell
         $data['sb'][1] = self::sellBuy($req, $app, 24); // Buy & Strong Buy
         
-        $data['wp'][0] = self::watchlistPortfolio($req, $app, 1); // Watchlist
-        $data['wp'][1] = self::watchlistPortfolio($req, $app, 2); // Portfolio
+        //$data['wp'][0] = self::watchlistPortfolio($req, $app, 1); // Watchlist
+        //$data['wp'][1] = self::watchlistPortfolio($req, $app, 2); // Portfolio
         
         $data['alg'] =  self::activesLosersGainers($req, $app, 1); // Top 10 Actives, Gainers, Losers
         
@@ -76,8 +80,8 @@ class SubscribeProvider
         self::sellBuyWatchPortExp($app, $data['sb'][0], $this->csv[0]);
         self::sellBuyWatchPortExp($app, $data['sb'][1], $this->csv[1]);
         
-        self::sellBuyWatchPortExp($app, $data['wp'][0][0], $this->csv[2]);
-        self::sellBuyWatchPortExp($app, $data['wp'][1], $this->csv[3], 1);
+        //self::sellBuyWatchPortExp($app, $data['wp'][0][0], $this->csv[2]);
+        //self::sellBuyWatchPortExp($app, $data['wp'][1], $this->csv[3], 1);
         
         self::activeGainLostExp($app, $data['alg'], $this->csv[4]);
         
@@ -103,23 +107,28 @@ class SubscribeProvider
         {
             for ($z=0;$z<3;$z++)
             {
-                $val = $data[$z];
-                $summary = $val{$y}->getSummary();
-                if ($summary == 1)
+                $val = (isset($data[$z])) ? $data[$z] : null;
+                if (!is_null($val))
                 {
-                    $summary = "SELL";
-                } else if ($summary == 2)
-                {
-                    $summary = "BUY";
-                } else if ($summary == 3)
-                {
-                    $summary = "STRONG SELL";
-                } else if ($summary == 4)
-                {
-                    $summary = "STRONG BUY";
-                } else if ($summary == 5)
-                {
-                    $summary = "NEUTRAL";
+                    $summary = $val{$y}->getSummary();
+                    if ($summary == 1)
+                    {
+                        $summary = "SELL";
+                    } else if ($summary == 2)
+                    {
+                        $summary = "BUY";
+                    } else if ($summary == 3)
+                    {
+                        $summary = "STRONG SELL";
+                    } else if ($summary == 4)
+                    {
+                        $summary = "STRONG BUY";
+                    } else if ($summary == 5)
+                    {
+                        $summary = "NEUTRAL";
+                    }
+                } else {
+                    $summary = "N/A";
                 }
                 
                 $traded = $val{$y}->getVolume() * $val{$y}->getCloseTotal();
@@ -247,7 +256,25 @@ class SubscribeProvider
             
             if ( ! empty($dqlResult))
             {
-                self::sendReports($app, $dqlResult);
+                // Get watchlist and portfolio data
+                foreach ($dqlResult as $value) {
+                    if ($value->getSubscribedFor() == 3)
+                    {
+                         // Watchlist data
+                        $data['wp'][0] = self::watchlistPortfolio($req, $app, 1, $f['id']);
+                        // Watchlist CSV
+                        self::sellBuyWatchPortExp($app, $data['wp'][0][0], $this->csv[5]." - ".$f['id'].".csv");
+        
+                    } elseif ($value->getSubscribedFor() == 4)
+                    {
+                         // Portfolio data
+                        $data['wp'][1] = self::watchlistPortfolio($req, $app, 2, $f['id']);
+                        // Portfolio CSV
+                        self::sellBuyWatchPortExp($app, $data['wp'][1], $this->csv[6]." - ".$f['id'].".csv", 1);
+                    }
+                }
+
+                self::sendReports($app, $dqlResult, $f['id']);
             }
             
             unset($f);
@@ -256,7 +283,7 @@ class SubscribeProvider
         return "done";
     }
     
-    public function sendReports(Application $app, $result)
+    public function sendReports(Application $app, $result, $uId)
     {
         $now = new \DateTime('now');
         $now = $now->format('l, F j, Y');
@@ -276,11 +303,11 @@ class SubscribeProvider
                 break;
                 
                 case 3:
-                    $path = $this->csv[2];
+                    $path = $this->csv[5]." - ".$uId.".csv";
                 break;
                 
                 case 4:
-                    $path = $this->csv[3];
+                    $path = $this->csv[6]." - ".$uId.".csv";
                 break;
                 
                 case 5:
@@ -345,7 +372,7 @@ class SubscribeProvider
         return $data;
     }
     
-    public function watchlistPortfolio(Request $req, Application $app, $method = NULL)
+    public function watchlistPortfolio(Request $req, Application $app, $method = NULL, $user = NULL)
     {
         $data = $sinceClose = array();
         $action = (is_null($method)) ? (int) $req->get('action') : $method;
@@ -354,18 +381,26 @@ class SubscribeProvider
         $dates = "SELECT DISTINCT s.created_at FROM models\Scraped s ORDER BY s.created_at DESC";
         $dates = $app['orm.em']->createQuery($dates);
         $dates->setMaxResults(1);
-        $dateResult = $dates->getResult();
+        $dateResult = $dates->getResult();        
         
         if ($action == 1)
         {
             $fql = "SELECT DISTINCT s.abbreviation FROM models\Watchlist s 
-                    WHERE s.view_status = 1 ORDER BY s.abbreviation ASC";
+                    WHERE s.user = :user AND s.view_status = 1 ORDER BY s.abbreviation ASC";
+
+            //$fql = "SELECT DISTINCT s.abbreviation FROM models\Watchlist s 
+                    //WHERE s.view_status = 1 ORDER BY s.abbreviation ASC";
         } else {
+
             $fql = "SELECT DISTINCT s.abbreviation, s.closing_price, s.since FROM models\Portfolio s 
-                    WHERE s.view_status = 1 ORDER BY s.abbreviation ASC";
+                    WHERE s.user = :user AND s.view_status = 1 ORDER BY s.abbreviation ASC";
+
+            //$fql = "SELECT DISTINCT s.abbreviation, s.closing_price, s.since FROM models\Portfolio s 
+                    //WHERE s.view_status = 1 ORDER BY s.abbreviation ASC";
         }
         
         $fql = $app['orm.em']->createQuery($fql);
+        $fql->setParameter("user", $user);
         
         foreach ($fql->getResult() as $f)
         {

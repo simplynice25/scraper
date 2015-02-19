@@ -1,10 +1,11 @@
 // JavaScript Document
 
-$(document).ready(function(){
-	//$(".actions-btn .btn").tooltip();
-});
-
 (function(){
+
+	$('#menuModal').on('hide.bs.modal', function(){
+		$('.btn-dynamic-menu').removeClass('btn-sell btn-neutral btn-buy');
+		$('.title-dynamic-menu').removeClass('title-sell title-neutral title-buy');
+	})
 
 	var funcConf = {
 		actionsBtn: ".actions-btn .btn",
@@ -33,9 +34,24 @@ $(document).ready(function(){
 		editLink: ".edit-link",
 		linkModal: "#newLink",
 		pastData: "#pastData",
+		dynamicMenu: ".show-btn .btn",
 	}
 	
 	var funcInit = {
+		dynamicMenu: function(){
+			return this.delegate(funcConf.dynamicMenu, "click", function(){
+				var self = $(this),
+					menuData = self.data('menu');
+
+					$('.title-dynamic-menu').text(menuData.txt).addClass(menuData.color);
+					var txt = (menuData.txt == 'VIEW ALL') ? '' : ' ' + menuData.txt;
+					$('.btn-dynamic-menu').text('VIEW ALL' +txt).addClass(menuData.btn).attr('href', menuData.url);
+
+					$('.subsector-anchor').each(function(){
+						$(this).attr('href', menuData.url + '&subsector=' + $(this).data('subsector'));
+					})
+			})
+		},
 		actionsInit: function(){
 			return this.delegate(funcConf.actionsBtn, "click", function(){
 				
@@ -113,7 +129,14 @@ $(document).ready(function(){
                     
                     var _title = $('.past-data-title').data('title');
                     _self.find("#myModalLabel").html(_title);
-					//$('#scrapedTable2').tablesorter({headers: {5: {sorter: false},}});
+					$('#scrapedTable2').tablesorter({
+			            textExtraction: function(node){ 
+			                var cell_value = $(node).text();
+			                var sort_value = $(node).data('traded');
+			                return (sort_value != undefined) ? sort_value : cell_value;
+			            },
+			            //sortList: [[1,1]]
+			        });
 				})
 				.fail(function(){
 					console.log("Something went wrong!");
@@ -135,6 +158,8 @@ $(document).ready(function(){
 				$('input[name=code]').val('');
 				$('input[name=name]').val('');
 				$('input[name=link]').val('');
+				//$('select[name=category] option[value=0]').attr('selected', true);
+				$('select[name=category]').val('');
 				$('input[name=label]').tagsinput('removeAll');
 				
 				$('form[name=link-action]').attr('action', _link)
@@ -144,6 +169,7 @@ $(document).ready(function(){
 			return this.delegate(funcConf.editLink, "click", function(){
 				var _self = $(this),
 					_parentRow = _self.parent('div').parent('td').parent('tr').attr('id'),
+					_category = _self.parent('div').parent('td').parent('tr').data('category'),
 					_data = $('#' + _parentRow + ' td').map(function(){ return $(this).text() }),
 					_link = $('form[name=link-action]').data('href')
 					_id = $('#' + _parentRow).data('id'),
@@ -151,20 +177,21 @@ $(document).ready(function(){
                     _type = _self.data('type');
 					
 					$('input[name=id]').val(_id);
+					_category = (_category > 0) ? _category : 0;
                     if (_type == 1)
                     {
                         $('input[name=code]').val(_data[0]);
                         $('input[name=name]').val(_data[1]);
                         $('input[name=link]').val(_data[2]);
+                        $('select[name=category] option[value='+_category+']').prop('selected', true);
                     } else {
                         $('input[name=code]').removeAttr('required').parent().hide();
                         $('input[name=name]').removeAttr('required').parent().hide();
                         $('input[name=link]').removeAttr('required').parent().hide();
+                        $('select[name=category]').removeAttr('required').parent().hide();
                     }
 					$('input[name=label]').tagsinput('removeAll');
 					$('input[name=label]').tagsinput('add', _labels);
-                    
-                    //console.log(_labels);
 					
 					$('form[name=link-action]').attr('action', _link + '?edit=true')
 			})
@@ -177,5 +204,6 @@ $(document).ready(function(){
 	config.doc.editLink();
 	config.doc.pastDataShow();
 	config.doc.pastDataHide();
+	config.doc.dynamicMenu();
 
 })(jQuery,window,document)

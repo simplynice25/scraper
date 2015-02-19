@@ -27,3 +27,14 @@ user_edit_success: User successfully updated.
 
 #SUBSCRIPTIONS
 subscription_updated: Subscription successfully updated.
+
+
+#SKIP DATES
+invalid_date_id: Date ID is invalid.
+dates_added: Dates successfully added.
+
+#REGISTRATION
+invalid_captcha: Invalid Captcha, please try again.
+registration_success: Activate your account through the link we've sent via email.
+invalid_confirm_token: Invalid account confirmation token.
+account_activated: Account activation successful.

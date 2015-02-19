@@ -22,6 +22,10 @@ class AdminProvider
 		$ui->match('/add-user', 'admin\AdminProvider::addUser')->bind("add-user");
 		$ui->match('/ban-user/{id}', 'admin\AdminProvider::banUser')->bind("ban-user");
 
+        // Skip Dates
+        $ui->match('/dates', 'admin\Dates::skipDates')->bind("dates");
+        $ui->match('/dates-action', 'admin\Dates::skipDatesAction')->bind("date-action");
+
 		$before = function (Request $request, Application $app) {
 
             $username = $granted = NULL;

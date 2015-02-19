@@ -12,7 +12,7 @@ define('CSV_EMAIL', __DIR__ . '/csv/email');
 include_once('settings.php');
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-$app_debug = FALSE;
+$app_debug = TRUE;
 $app = new Silex\Application();
 
 $app['debug'] = $app_debug;
@@ -34,7 +34,7 @@ $app["twig"] = $app->share($app->extend("twig", function (\Twig_Environment $twi
     $twig->addExtension(new custom_twig\Colors($app));
 	$twig->addExtension(new custom_twig\Captcha($app));
 	$twig->addExtension(new custom_twig\DateDiff($app));
-	//$twig->addExtension(new custom_twig\Labels($app));
+	$twig->addExtension(new custom_twig\Categories($app));
 
     return $twig;
 }));
@@ -61,6 +61,7 @@ $app->register(new Silex\Provider\SecurityServiceProvider(), array(
 		)
 	),
 	'security.access_rules' => array(
+		array('/u/data/show-all-data', 'ROLE_ADMIN'),
 		array('^/u/', 'ROLE_USER'),
         array('^/subscribe/', 'IS_AUTHENTICATED_ANONYMOUSLY'),
 		array('/subscribe', 'ROLE_USER'),
@@ -78,8 +79,9 @@ $app['locale'] = 'en';
 
 $app->mount('/credentials', general\Credentials::routing($app));
 $app->mount('/', general\UserLogin::routing($app));
+//$app->mount('/register', general\UserRegistration::routing($app));
 $app->mount('/u', user\UserProvider::routing($app));
-$app->mount('/scrape', user\ScrapeProvider::routing($app));
+$app->mount('/scanner', user\ScrapeProvider::routing($app));
 $app->mount('/dashboard', admin\AdminProvider::routing($app));
 $app->mount('/subscribe', user\SubscribeProvider::routing($app));
 

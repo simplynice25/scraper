@@ -1,0 +1,114 @@
+{% for k, scrape in scrapes if scrape|length > 0 and statuses[k][2][1] != "Unhide" or view == 3 %}
+
+{% if statuses[k][3] != 'inactive' %}
+
+{% set dataLeft = scrape|length %}
+{% set latestPrice = scrape[0].getCloseTotal %}
+{% set tradedVal = scrape[0].getVolume*latestPrice %}
+{% set sector = (data_sector is not null) ? data_sector[k]~'-sector' : null %}
+{% set subsector = (data_sector is not null ) ? data_sector[k] : null %}
+
+
+<tr{% if show == "24" and tradedVal < 1000000 %} class="hide"{% endif %}>
+    {#<td>{{k}}</td>#}
+    {% if show == "00" %}
+    <td>{{ sector|categories|raw }}</td>
+    <td>{{ subsector|categories|raw }}</td>
+    {% endif %}
+    <td class="abbr" data-toggle="modal" data-target="#pastData">{{ scrape[0].getAbbr }}</td>
+    <td class="price" data-traded="{{ latestPrice }}">
+        {{ latestPrice|number_format(2, '.', ',') }}
+        <br/>
+        {% if latestPrice == scrape[0].getWkHighRange %}
+        <span>ALL TIME HIGH</span><br/>
+        {% endif %}
+        {% if latestPrice == scrape[0].getWkLowRange %}
+        <span>ALL TIME LOW</span><br/>
+        {% endif %}
+        <span>52H: {{ scrape[0].getWkHighRange }}</span>
+        <br/>
+        <span>52L: {{ scrape[0].getWkLowRange }}</span>
+        <br/>
+        <span>P/E: {{ scrape[0].getPeRatio }}</span>
+        <br/>
+        <span>EPS: {{ scrape[0].getEps }}</span>
+    </td>
+    
+    {% if view == 2 %}
+    {% set gainLoss = ( ( latestPrice / sinceClose[k][0] ) - 1 ) * 100 %}
+    {% set sinceDay = (sinceClose[k][1] is defined and sinceClose[k][1] is not empty) ? sinceClose[k][1]|date('Y-m-d') : NULL %}
+    {% set daysAgo = scrape[0].getCreatedAt|date('Y-m-d')~"*"~sinceDay %}
+        <td data-traded="{{gainLoss}}">
+            <small>You have {% if gainLoss > 0 %}gained{% elseif gainLoss < 0 %}lost{% endif %}</small><br/>
+            {{ gainLoss|number_format(2, '.', ',') }}%<br/>
+            <small>Since {{ sinceClose[k][1]|date('m/d/Y') }}</small><br/>
+            <small>{{ daysAgo|date_diff }}</small><br/>
+        </td>
+    {% endif %}
+
+    {% for l, s in scrape %}
+        
+        {% if dates[l] is defined and s.getCreatedAt|date('m/d/Y') == dates[l]|date('m/d/Y')  %}
+        {# if s.getViewStatus == 5  #}
+
+        {% if s.getSummary == 1 %}
+            {% set summ = { 0: "summ-sell", 1: "SELL" } %}
+        {% elseif s.getSummary == 2 %}
+            {% set summ = { 0: "summ-buy", 1: "BUY" } %}
+        {% elseif s.getSummary == 3 %}
+            {% set summ = { 0: "summ-strong-sell", 1: "STRONG SELL" } %}
+        {% elseif s.getSummary == 4 %}
+            {% set summ = { 0: "summ-strong-buy", 1: "STRONG BUY" } %}
+        {% elseif s.getSummary == 5 %}
+            {% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
+        {% else %}
+            {% set summ = { 0: "summ-null", 1: "N/A" } %}
+        {% endif %}
+        
+        {% set traded = s.getVolume*s.getCloseTotal %}
+    
+        <td class="{{ summ[0] }}" data-traded="{% if traded > 0 %}{{ traded }}{% else%}0{% endif %}">
+            {{ summ[1] }} ({% if s.getChangePercent > 0 %}+{% endif %}{{ s.getChangePercent }}%)
+            <br/>
+            <span>MA: BUY ({{ s.getAverageBuy }}) SELL ({{ s.getAverageSell }})</span>
+            <br/>
+            <span>TI: BUY ({{ s.getTechnicalBuy }}) SELL ({{ s.getTechnicalSell }})</span>
+            <br/>
+            <span>VOLUME: {{ s.getVolume|number_format }}</span>
+            <br/>
+            <span>TRADED: {{ traded|number_format }} {# s.getCreatedAt|date('m/d/Y') #}</span>
+        </td>
+        {% else %}
+        <td data-traded="0">---</td>
+        {% endif %}
+
+    {% endfor %}
+
+    {% if dataLeft != 5 %}
+        {% for i in 1..5-dataLeft %}
+        <td>---</td>
+        {% endfor %}
+    {% endif %}
+    <td>
+        <div class="btn-group actions-btn">
+            <button class="btn {{ statuses[k][0][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 1, "type": {{ statuses[k][0][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][0][1] }}">
+                <i class="fa fa-list"></i>
+            </button>
+            <button class="btn {{ statuses[k][1][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 2, "type": {{ statuses[k][1][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][1][1] }}">
+                <i class="fa fa-file-powerpoint-o"></i>
+            </button>
+            <button class="btn {{ statuses[k][2][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 3, "type": {{ statuses[k][2][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][2][1] }}">
+                <i class="fa fa-eye-slash"></i>
+            </button>
+            <!--
+            {% if role == 'ROLE_ADMIN' %}
+            <button class="btn btn-default btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 4, "type": 1}' data-toggle="tooltip" data-placement="top" title="Remove">
+                <i class="fa fa-trash-o"></i>
+            </button>
+            {% endif %}
+            -->
+        </div>
+    </td>
+</tr>
+{% endif %}
+{% endfor %}

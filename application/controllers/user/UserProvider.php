@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 use general\Tools;
 use user\ScrapeProvider;
+use custom_twig\Categories;
 
 class UserProvider
 {
@@ -73,6 +74,21 @@ class UserProvider
 		return $ui;
 	}
 
+    public function fetchSubSectors($app, $subsector)
+    {
+        $sql = "SELECT GROUP_CONCAT(CONCAT('''', code, '''' )) AS codes 
+                        FROM psemonitor_links
+                        WHERE category = $subsector";
+                                            
+        $result = $app['db']->fetchAll($sql);
+
+        //echo "<pre>";
+        //print_r($result);
+        //exit;
+
+        return $result;
+    }
+
 	public function losersGainers(Request $req, Application $app)
 	{
 		$data = array();
@@ -82,6 +98,18 @@ class UserProvider
 		{
 			$lastDate = $lastData->getCreatedAt();
 		}
+
+        $extraQ = $inCodes = null;
+        $subsector = (int) $req->get('subsector');
+        if (!empty($subsector) && is_numeric($subsector))
+        {
+            $codes = self::fetchSubSectors($app, $subsector);
+            if (!empty($codes) && isset($codes[0]) && isset($codes[0]['codes']))
+            {
+                $inCodes = $codes[0]['codes'];
+                $extraQ = " AND s.abbr IN ( $inCodes ) ";
+            }
+        }
 		
 		$operators = array(">", "<");
 		$sortOrders = array(", s.change_percent DESC", ", s.change_percent ASC");
@@ -89,7 +117,7 @@ class UserProvider
 		for ($i=0;$i<2;$i++)
 		{
 			$dql = "SELECT s FROM models\Scraped s 
-					WHERE s.change_percent " . $operators[$i] . " 0 AND s.created_at = :lastDate ORDER BY s.created_at DESC" . $sortOrders[$i];
+					WHERE s.change_percent " . $operators[$i] . " 0$extraQ AND s.created_at = :lastDate GROUP BY s.abbr ORDER BY s.created_at DESC" . $sortOrders[$i];
 	
 			$dql = $app['orm.em']->createQuery($dql);
 			$dql->setParameter("lastDate", $lastDate);
@@ -97,7 +125,7 @@ class UserProvider
 		}
 
         $dql = "SELECT s FROM models\Scraped s 
-                WHERE s.created_at = :lastDate ORDER BY s.created_at DESC, s.volume DESC";
+                WHERE s.created_at = :lastDate$extraQ GROUP BY s.abbr ORDER BY s.created_at DESC, s.volume DESC";
 
         $dql = $app['orm.em']->createQuery($dql);
         $dql->setParameter("lastDate", $lastDate);
@@ -108,10 +136,17 @@ class UserProvider
 		//exit;
         
         $lastDate = (isset($lastDate)) ? $lastDate->format("l, F j, Y") : "---";
+        $title = "Actives, Gainers & Losers for ";
+        if ($subsector > 0)
+            $title .= strtolower(Categories::categories($subsector)) . " ";
+        $title .= " as for today, " . $lastDate;
+
 		
 		$view = array(
-			'title' => 'Actives, Gainers & Losers for today, ' . $lastDate,
-			'scrapes' => $data
+			'title' => $title,
+			'scrapes' => $data,
+            'hasSector' => $inCodes,
+            'subsector' => $subsector,
 		);
 		
 		return $app['twig']->render('front/gain-loss.twig', $view);
@@ -128,7 +163,7 @@ class UserProvider
 		$show = $req->get('show');
         $label = $req->get('label');
 		$aView = (isset($view)) ? $view : 0;
-		$aShow = (isset($show) && ! empty($show)) ? $show : "24";
+		$aShow = (isset($show) && ! empty($show)) ? $show : "00"; // 24
         
         $user = Tools::connectedUser($app);
 
@@ -138,6 +173,19 @@ class UserProvider
 		{
 			$lastDate = $lastData->getCreatedAt();
 		}
+
+        $extraQ = $extraR = $inCodes = null;
+        $subsector = (int) $req->get('subsector');
+        if (!empty($subsector) && is_numeric($subsector))
+        {
+            $codes = self::fetchSubSectors($app, $subsector);
+            if (!empty($codes) && isset($codes[0]) && isset($codes[0]['codes']))
+            {
+                $inCodes = $codes[0]['codes'];
+                $extraQ = " AND s.abbr IN ( $inCodes ) ";
+                $extraR = " AND s.abbreviation IN ( $inCodes ) ";
+            }
+        }
 
 		// Get all abbr
         if ( ! empty($label))
@@ -154,20 +202,20 @@ class UserProvider
         }
         else if (empty($view) || $view > 3 || ! is_int($view))
 		{
-			$latestData = "SELECT DISTINCT s.abbr, s.id FROM models\Scraped s WHERE s.created_at = :lastDate ORDER BY s.volume DESC";
+			$latestData = "SELECT DISTINCT s.abbr, s.id FROM models\Scraped s WHERE s.created_at = :lastDate$extraQ GROUP BY s.abbr ORDER BY s.volume DESC";
             // s.created_at DESC
 		}
 		else if ($view == 1)
 		{
-			$latestData = "SELECT DISTINCT s.abbreviation FROM models\Watchlist s WHERE s.view_status = 1 AND s.user = :user ORDER BY s.abbreviation ASC";
+			$latestData = "SELECT DISTINCT s.abbreviation FROM models\Watchlist s WHERE s.view_status = 1 AND s.user = :user$extraR GROUP BY s.abbreviation ORDER BY s.abbreviation ASC";
 		}
 		else if ($view == 2)
 		{
-			$latestData = "SELECT DISTINCT s.abbreviation, s.closing_price, s.since FROM models\Portfolio s WHERE s.view_status = 1 AND s.user = :user ORDER BY s.abbreviation ASC";
+			$latestData = "SELECT DISTINCT s.abbreviation, s.closing_price, s.since FROM models\Portfolio s WHERE s.view_status = 1 AND s.user = :user$extraR GROUP BY s.abbreviation ORDER BY s.abbreviation ASC";
 		}
 		else if ($view == 3)
 		{
-			$latestData = "SELECT DISTINCT s.abbreviation FROM models\Hidden s WHERE s.view_status = 1 AND s.user = :user ORDER BY s.abbreviation ASC";
+			$latestData = "SELECT DISTINCT s.abbreviation FROM models\Hidden s WHERE s.view_status = 1 AND s.user = :user$extraR GROUP BY s.abbreviation ORDER BY s.abbreviation ASC";
 		}
 		$latestScraped = $app['orm.em']->createQuery($latestData);
 		if (empty($view) || $view > 3 || ! is_int($view))
@@ -190,11 +238,11 @@ class UserProvider
 		// Get all 5 latest history
 		if($aShow == "00")
 		{
-			$latestFive = self::sortOut($app, $latestScraped->getResult(), $aShow, 1, $view);
+			$latestFive = self::sortOut($app, $latestScraped->getResult(), $aShow, 1, $view, $extraQ);
 		}
 		else
 		{
-			$latestFive = self::sortOut($app, $latestScraped->getResult(), $aShow, 2, $view);
+			$latestFive = self::sortOut($app, $latestScraped->getResult(), $aShow, 2, $view, $extraQ);
 		}
 
 		if ($view == 2)
@@ -226,53 +274,92 @@ class UserProvider
         } else if ($aShow == "00" && empty($view))
         {
 			$title =
-			$heading = "Updates as of " . $latestDate;
+			$heading = "Updates ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . " ";
+
+            $heading .= "as of " . $latestDate;
         }
         else if ($aShow == "00" && $view == 1)
         {
             $title =
-            $heading = "Watchlist";
+            $heading = "Watchlist ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . ".";
         }
         else if ($aShow == "00" && $view == 2)
         {
             $title =
-            $heading = "Portfolio";
+            $heading = "Portfolio ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . ".";
         }
         else if ($aShow == "00" && $view == 3)
         {
             $title =
-            $heading = "Hidden";
+            $heading = "Hidden ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . ".";
         }
         else if ($aShow == "13")
 		{
 			$title =
-			$heading = "SELL alerts as of " . $latestDate;
+			$heading = "SELL alerts ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . " ";
+
+            $heading .= "as of " . $latestDate;
 		}
 		else if ($aShow == "24")
 		{
 			$title = 
-			$heading = "BUY alerts as of " . $latestDate;	
+			$heading = "BUY alerts ";
+
+            if ($subsector > 0)
+                $heading .= "for " . strtolower(Categories::categories($subsector)) . " ";
+
+            $heading .= "as of " . $latestDate;	
 		}
+
+        $status_attr = self::checkStatusAttr($app, $latestFive, 1);
 
 		$view = array(
 			'title' => $title,
 			'scrapes' => $latestFive,
 			'dates' => $dates,
-			'statuses' => self::checkStatusAttr($app, $latestFive, 1),
+			'statuses' => $status_attr[0],
 			'heading' => $heading,
 			'view' => $view,
+			'show' => $aShow,
 			'sinceClose' => $sinceClose,
-            'role' => $app['session']->get('is_granted')
+            'role' => $app['session']->get('is_granted'),
+            'message' => $req->get('message'),
+            'hasSector' => $inCodes,
+            'subsector' => $subsector,
+            'data_sector' => ($aShow == "00") ? $status_attr[1] : null,
 		);
 		
 		//echo "<pre>";
-		//print_r($dates);
+		//print_r($view['data_sector']);
 		//exit;
 
 		return $app['twig']->render('front/index.twig', $view);
 	}
 
-	public function sortOut(Application $app, $objects, $aShow, $action = NULL, $view = NULL)
+    public function getSectorSub($app, $code)
+    {
+        $query = "SELECT category FROM psemonitor_links WHERE code = '$code' AND view_status = 5";
+        $result = $app['db']->fetchAll($query);
+
+        return $result[0]['category'];
+    }
+
+	public function sortOut(Application $app, $objects, $aShow, $action = NULL, $view = NULL, $extraQ = NULL)
 	{
 		$data = array();
 		if ($action == 1)
@@ -357,7 +444,7 @@ class UserProvider
 	{
         $user = Tools::connectedUser($app);
         $userId = $user->getId();
-		$status = array();
+		$status = $sectors = array();
 		foreach ($objects as $k => $obj)
 		{
 			$abbr = ( ! is_null($action)) ? $obj{0}->getAbbr() : $obj->getAbbr();
@@ -388,9 +475,11 @@ class UserProvider
 				$status[$k][3] = 'active';
 			
 			unset($obj);
+            
+            $sectors[] = self::getSectorSub($app, $abbr);
 		}
 
-		return $status;
+		return array($status, $sectors);
 	}
 
 	public function dataDelete(Request $req, Application $app)
@@ -528,8 +617,15 @@ class UserProvider
 	{
 		$abbr = $req->get("abbr");
 		$pastData = Tools::findBy($app, "\Scraped", array("abbr" => $abbr), array("created_at" => "DESC"), 30);
+        $link = Tools::findOneBy($app, "\Links", array("code" => $abbr));
         
-        $view = array('scrapes' => $pastData, 'dataTitle' => self::dataTitle($app, $pastData{0}));
+        $view = array(
+        	'abbr' => $abbr,
+        	'scrapes' => $pastData,
+        	'wh' => array(300,560),
+        	'dataTitle' => self::dataTitle($app, $pastData{0}),
+            'link' => $link,
+        );
 
 		return $app['twig']->render('front/appends/past-data.twig', $view);
 	}
@@ -538,11 +634,15 @@ class UserProvider
 	{
 		$abbr = $req->get("abbr");
 		$pastData = Tools::findBy($app, "\Scraped", array("abbr" => $abbr), array("created_at" => "DESC"));
+        $link = Tools::findOneBy($app, "\Links", array("code" => $abbr));
 		
 		$view = array(
-			"title" => $abbr . " DATA",
-			"scrapes" => $pastData,
-            "dataTitle" => self::dataTitle($app, $pastData{0})
+        	'abbr' => $abbr,
+			'title' => $abbr . " DATA",
+			'scrapes' => $pastData,
+			'wh' => array(400,980),
+            'dataTitle' => self::dataTitle($app, $pastData{0}),
+            'link' => $link,
 		);
 
 		return $app['twig']->render('front/show-all.twig', $view);
@@ -585,6 +685,7 @@ class UserProvider
 		$url = $req->get("link");
 		$label = $req->get("label");
 		$edit = $req->get("edit");
+		$category = (int) $req->get("category");
 
         if( !empty($code))
         {
@@ -635,7 +736,7 @@ class UserProvider
         
         if ($msg != "label_added")
         {
-            //$link->setLabel($label);
+            $link->setCategory($category);
             $link->setNothing(0);
             $link->setViewStatus(5);
             $link->setCreatedAt("now");

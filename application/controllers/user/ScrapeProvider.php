@@ -17,7 +17,7 @@ class ScrapeProvider
 	
 	public function __construct()
 	{
-		$this->per_scrape = 20;
+		$this->per_scrape = 30;
 	}
 
 	public static function routing(Application $app)
@@ -25,9 +25,56 @@ class ScrapeProvider
 		$ui = $app['controllers_factory'];
 		$ui->match('/', 'user\ScrapeProvider::index')->bind("scrape");
         $ui->match('/extra', 'user\ScrapeProvider::scrapeExtra')->bind("scrape-extra");
+        //$ui->match('/is-scrape', 'user\ScrapeProvider::isScrape');
 
 		return $ui;
 	}
+
+    public function isScrape($app, $now)
+    {
+        $msg = "Please try again";
+        $amPm = $now->format('a'); // am, pm
+        $hourNoZero = $now->format('g'); // Hours 1, 2, 3 up to 12
+        $MinWithZero = $now->format('i'); // 00, 01, 02 up to 60
+        $dayNoZero = $now->format('j'); // 1, 2, 3, 4 up to 31
+        $dayTxt = strtolower($now->format('D')); // mon, tue, wed, thur, friday, sat and sun
+        $monthText = strtolower($now->format('M')); // jan, feb, march to dec
+
+        // List of fixed holidays
+        $fixedHolidays = array('jan1','feb25','apr9','may1','jun12','aug21','nov1','nov2','nov30','dec24','dec25','dec30','dec31');
+        // Scraping hours
+        $scrapingHours = array('4','5','6','7','8','9','10','11');
+
+        // No scrape for sat and sun
+        if ($dayTxt == 'sat' || $dayTxt == 'sun')
+        {
+            //exit('No scraping today!');
+            exit($msg);
+        }
+
+        // No scrape if not 4 pm to 11 pm
+        if ( $amPm != 'pm' || ! in_array($hourNoZero, $scrapingHours) || $hourNoZero == '11' && $MinWithZero != '00' )
+        {
+            //exit('No scraping yet!');
+            exit($msg);
+        }
+
+        // No scraping for holidays
+        if (in_array($monthText.$dayNoZero, $fixedHolidays))
+        {
+            //exit('No scraping today, because it\'s holiday!');
+            exit($msg);
+        }
+
+        $skipOrNot = Tools::findOneBy($app, '\Dates', array('skip_date' => $now));
+        if ( ! empty($skipOrNot))
+        {
+            //exit('No data scraping today: ' . $now->format('l, F d Y'));
+            exit($msg);
+        }
+
+        return true;
+    }
     
     public function scrapeExtra(Request $req, Application $app)
     {
@@ -69,6 +116,9 @@ class ScrapeProvider
 
 	public function index(Application $app)
 	{
+        $dateToday = new \DateTime("now");
+        self::isScrape($app, $dateToday);
+
 		//$dump = array();
 		ini_set('memory_limit', '-1');
 		ini_set('user_agent', 'Mozilla/5.0 (Windows NT 6.1; rv:19.0) Gecko/20100101 Firefox/19.0');
@@ -76,7 +126,6 @@ class ScrapeProvider
 
 		//Check for the last scraped data TODAY
 		$lastScrapedVal = 0;
-		$dateToday = new \DateTime("now");
 		$now = $dateToday->format("Y-m-d");
 		$lastScraped = Tools::findOneBy($app, "\ScrapedLog", array("created_at" => $dateToday, "view_status" => 5));
 		if ( ! empty($lastScraped))
@@ -97,9 +146,13 @@ class ScrapeProvider
 		
 		foreach($links as $k => $l)
 		{
+			$home = null;
             $url_ = urldecode($l->getLink());
-            $home = file_get_html(str_replace('-technical', '', $url_));
-			$data = file_get_html($url_);
+            if (strpos($url_, '-technical') !== false) {
+	            $home = file_get_html(str_replace('-technical', '', $url_));
+            }
+
+            $data = file_get_html($url_);
             
             $code = $l->getCode();
             $abbr = (empty($code)) ? self::extractParenthesis($data->find('h1.[itemprop=name]', 0)->innertext) : $code;
@@ -123,8 +176,12 @@ class ScrapeProvider
 
 			$scraped->setAbbr($abbr);
 			$scraped->setSummary($summary[0]);
+            $scraped->setAverageBuy($movingAverageBuy);
+            $scraped->setAverageSell($movingAverageSell);
 			$scraped->setMovingAverages($movingAverageBuy-$movingAverageSell);
 			$scraped->setMovingAveragesTotal($movingAverageBuy+$movingAverageSell);
+            $scraped->setTechnicalBuy($technicalIndicatorBuy);
+            $scraped->setTechnicalSell($technicalIndicatorSell);
 			$scraped->setTechnicalIndicators($technicalIndicatorBuy-$technicalIndicatorSell);
 			$scraped->setTechnicalIndicatorsTotal($technicalIndicatorBuy+$technicalIndicatorSell);
 			$scraped->setOpenTotal($openH1-($openSpan));
@@ -141,15 +198,20 @@ class ScrapeProvider
 			$app['orm.em']->persist($scraped);
 			$app['orm.em']->flush();
             
-            self::homeExtract($app, $home, $scraped);
+            if ( ! is_null($home)) {
+            	self::homeExtract($app, $home, $scraped);
+            }
 			
 			//$dump[] = $scraped;
 
 			// clean up memory
-            $home->clear();
 			$data->clear();
-            unset($home);
 			unset($data);
+
+			if ( ! is_null($home)) {
+            	$home->clear();
+            	unset($home);
+			}
 		}
 
 		// Save last scraped url
@@ -158,7 +220,9 @@ class ScrapeProvider
 			$lastScraped = new \models\ScrapedLog;
 		}
 
-		$lastScraped->setLastScrape(count($links)+$lastScrapedVal); // $this->per_scrape+$lastScrapedVal
+        $counter = count($links)+$lastScrapedVal;
+
+		$lastScraped->setLastScrape($counter); // $this->per_scrape+$lastScrapedVal
 		$lastScraped->setViewStatus(5);
 		$lastScraped->setCreatedAt("now");
 		$lastScraped->setModifiedAt("now");
@@ -169,7 +233,7 @@ class ScrapeProvider
 		//echo '<pre>';
 		//print_r($dump);
 		
-		return "OK";
+		return $counter . " entries scanned as of " . date('l d, Y') . "."; // February 4, 2015
 	}
 
     public function homeExtract($app, $data, $scraped)

@@ -9,7 +9,9 @@
       <div class="modal-body" style="height:400px;overflow:auto">
       </div>
       <div class="modal-footer">
-	  	<a href="{{ path('show-all-data') }}" data-href="{{ path('show-all-data') }}" class="show-all btn btn-info">Show all</a>
+        {% if app.session.get('is_granted') == 'ROLE_ADMIN' %}
+	  	  <a href="{{ path('show-all-data') }}" data-href="{{ path('show-all-data') }}" class="show-all btn btn-info">Show all</a>
+        {% endif %}
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
     </div>

@@ -7,135 +7,47 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="col-lg-12 scraped-table-yest">
-<h1>{{ heading }}</h1>
+{% if message is not empty %}
+    <div class="alert alert-info"><i class="fa fa-fw fa-exclamation-triangle"></i> {{ message|trans }}</div>
+{% endif %}
+{% if hasSector is defined and hasSector is null and subsector != 0 %}
+    <div class="alert alert-warning" style="margin-top:20px"><i class="fa fa-fw fa-exclamation-triangle"></i> No result for subsector <b>"{{ subsector|categories|raw }}</b>", showing all {{ title|lower }}.
+    </div>
+{% endif %}
+<h1 class="heading">{{ heading|raw }}</h1>
 {% include 'front/includes/actions-btn.twig' %}
 {% if scrapes|length > 0 %}
 <table id="scrapedTable" class="table table-bordered table-condensed table-hover main-table">
-		<thead>
-		<tr class="active">
-            {#<th>#</th>#}
-			<th>SYM</th>
-			<th>PRICE</th>
-			{% if view == 2 %}<th>GAIN/LOSS SINCE</th>{% endif %}
-			{% for date in dates %}
-				<th>{{ date|date("m/d/Y") }}</th>
-				{% set dateCount = dateCount+1 %}
-			{% endfor %}
-			{% if dateCount != 5 %}
-				{% for i in 1..5-dateCount %}
-				<th>---</th>
-				{% endfor %}
-			{% endif %}
-			<th>ACTIONS</th>
-		</tr>
-		</thead>
-		<tbody>
-		{% for k, scrape in scrapes 
-		if scrape|length > 0 and 
-		statuses[k][2][1] != "Unhide" or
-		view == 3 
-		%}
-
-		{% if statuses[k][3] != 'inactive'%}
-
-		{% set dataLeft = scrape|length %}
-
-		<tr>
-            {#<td>{{k}}</td>#}
-			<td class="abbr" data-toggle="modal" data-target="#pastData">{{ scrape[0].getAbbr }}</td>
-			<td data-value="{{ scrape[0].getCloseTotal }}">
-                {{ scrape[0].getCloseTotal|number_format(2, '.', ',') }}
-                <br/>
-                <span>52H: {{ scrape[0].getWkHighRange }}</span>
-                <br/>
-                <span>52L: {{ scrape[0].getWkLowRange }}</span>
-                <br/>
-                <span>P/E: {{ scrape[0].getPeRatio }}</span>
-                <br/>
-                <span>EPS: {{ scrape[0].getEps }}</span>
-            </td>
-			
-			{% if view == 2 %}
-			{% set gainLoss = ( ( scrape[0].getCloseTotal / sinceClose[k][0] ) - 1 ) * 100 %}
-			{% set sinceDay = (sinceClose[k][1] is defined and sinceClose[k][1] is not empty) ? sinceClose[k][1]|date('Y-m-d') : NULL %}
-			{% set daysAgo = scrape[0].getCreatedAt|date('Y-m-d')~"*"~sinceDay %}
-				<td>
-					<small>You have {% if gainLoss > 0 %}gained{% elseif gainLoss < 0 %}lost{% endif %}</small><br/>
-					{{ gainLoss|number_format(2, '.', ',') }}%<br/>
-					<small>Since {{ sinceClose[k][1]|date('m/d/Y') }}</small><br/>
-					<small>{{ daysAgo|date_diff }}</small><br/>
-				</td>
-			{% endif %}
-
-			{% for l, s in scrape %}
-				
-				{% if s.getCreatedAt|date('m/d/Y') == dates[l]|date('m/d/Y')  %}
-				{# if s.getViewStatus == 5  #}
-
-				{% if s.getSummary == 1 %}
-					{% set summ = { 0: "summ-sell", 1: "SELL" } %}
-				{% elseif s.getSummary == 2 %}
-					{% set summ = { 0: "summ-buy", 1: "BUY" } %}
-				{% elseif s.getSummary == 3 %}
-					{% set summ = { 0: "summ-strong-sell", 1: "STRONG SELL" } %}
-				{% elseif s.getSummary == 4 %}
-					{% set summ = { 0: "summ-strong-buy", 1: "STRONG BUY" } %}
-				{% elseif s.getSummary == 5 %}
-					{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
-				{% else %}
-					{% set summ = { 0: "summ-null", 1: "N/A" } %}
-				{% endif %}
-                
-                {% set traded = s.getVolume*s.getCloseTotal %}
-			
-				<td class="{{ summ[0] }}" data-value="{{ s.getVolume }}">
-					{{ summ[1] }} ({% if s.getChangePercent > 0 %}+{% endif %}{{ s.getChangePercent }}%)
-					<br/>
-					<span>MA: {{ s.getMovingAverages }} of {{ s.getMovingAveragesTotal }}</span>
-					<br/>
-					<span>TI: {{ s.getTechnicalIndicators }} of {{ s.getTechnicalIndicatorsTotal }}</span>
-					<br/>
-					<span>VOLUME: {{ s.getVolume|number_format }}</span>
-                    <br/>
-					<span>TRADED: {{ traded|number_format }} {# s.getCreatedAt|date('m/d/Y') #}</span>
-				</td>
-				{% else %}
-				<td>---</td>
-				{% endif %}
-
-			{% endfor %}
-
-			{% if dataLeft != 5 %}
-				{% for i in 1..5-dataLeft %}
-				<td>---</td>
-				{% endfor %}
-			{% endif %}
-			<td>
-				<div class="btn-group actions-btn">
-					<button class="btn {{ statuses[k][0][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 1, "type": {{ statuses[k][0][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][0][1] }}">
-						<i class="fa fa-list"></i>
-					</button>
-					<button class="btn {{ statuses[k][1][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 2, "type": {{ statuses[k][1][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][1][1] }}">
-						<i class="fa fa-file-powerpoint-o"></i>
-					</button>
-					<button class="btn {{ statuses[k][2][0] }} btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 3, "type": {{ statuses[k][2][2] }}}' data-toggle="tooltip" data-placement="top" title="{{ statuses[k][2][1] }}">
-						<i class="fa fa-eye-slash"></i>
-					</button>
-                    <!--
-                    {% if role == 'ROLE_ADMIN' %}
-					<button class="btn btn-default btn-xs" data-action='{"id": {{ scrape[0].getId }}, "method": 4, "type": 1}' data-toggle="tooltip" data-placement="top" title="Remove">
-						<i class="fa fa-trash-o"></i>
-					</button>
-                    {% endif %}
-                    -->
-				</div>
-			</td>
-		</tr>
-		{% endif %}
+	<thead>
+	<tr class="active">
+        {#<th>#</th>#}
+        {% if show == "00" %}
+        <th>SECTOR</th>
+        <th>SUBSECTOR</th>
+        {% endif %}
+		<th>SYM</th>
+		<th>PRICE</th>
+		{% if view == 2 %}<th>GAIN/LOSS SINCE</th>{% endif %}
+		{% for date in dates %}
+			<th>{{ date|date("m/d/Y") }}</th>
+			{% set dateCount = dateCount+1 %}
 		{% endfor %}
-		</tbody>
+		{% if dateCount != 5 %}
+			{% for i in 1..5-dateCount %}
+			<th>---</th>
+			{% endfor %}
+		{% endif %}
+		<th>ACTIONS</th>
+	</tr>
+	</thead>
+	<tbody>
+		{% if app.session.get('is_granted') == "ROLE_ADMIN" %}
+			{% include 'front/includes/list.scraped.admin.twig' %}
+		{% elseif app.session.get('is_granted') == "ROLE_USER" %}
+			{% include 'front/includes/list.scraped.user.twig' %}
+		{% endif %}
+	</tbody>
 </table>
 {% else %}
 <div class="alert alert-warning"><i class="fa fa-fw fa-exclamation-triangle"></i> No {{ heading }}.</alert>
@@ -146,20 +58,22 @@
 {% endblock %}
 
 {% block scripts %}
+{% set colSort = (view == 2) ? 3 : 2 %}
 <script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js"></script>
-<script>
+<script type="text/javascript">
 	$(document).ready(function(){
 		$('#scrapedTable').tablesorter({
             textExtraction: function(node){ 
                 var cell_value = $(node).text();
-                var sort_value = $(node).data('value');
+                var sort_value = $(node).data('traded');
                 return (sort_value != undefined) ? sort_value : cell_value;
             },
 			 headers: {
 			 	{{noSort}}: {
 					sorter: false
 				},
-			 }
+			 },
+			 sortList: [[{{colSort}},1]]
 		}); 
 	});
 </script>

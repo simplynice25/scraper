@@ -1,14 +1,32 @@
 {% extends 'layout.twig' %}
 
+{% block styles %}
+	<style type="text/css">
+		.btn-bottom{
+			margin-top: 8px;
+		}
+		.btn-bottom, .btn-bottom a{
+			padding: 0;
+		}
+		.btn-bottom a:last-child{
+			color: red;
+		}
+		#recaptcha_area,
+		#recaptcha_table {
+			margin: 0 auto;
+		}
+	</style>
+{% endblock %}
+
 {% block content %}
 {% set noThrow = "The user provider must return a UserInterface object." %}
 {% set errLog =  (error == "Bad credentials") ? "Invalid email or password." : error %}
 <div class="col-lg-4 col-lg-offset-4" style="margin-top:30px">
+<img src="{{ path('login') }}img/logo.png" class="img-responsive" style="max-width:360px;height:100"/>
 {% if message is not empty %}
 <div class="alert alert-info">{{ message|trans }}</div>
 {% endif %}
 <form role="form" action="{{ path('login_check') }}" method="POST">
-	<h2 class="form-signin-heading">Please sign in</h2>
 	<div class="form-group">
 		<input type="email" class="form-control" placeholder="Email address" name="_username" value="{{ last_username }}" required autofocus>
 	</div>
@@ -26,9 +44,10 @@
 		</div>
 	{% endif %}
 	
-	<button class="btn btn-sm btn-block btn-primary" type="submit">Sign in</button>
-    <div class="text-center">
-        <a href="#" class="btn btn-link" data-toggle="modal" data-target="#forgotPassword">Forgot password?</a>
+	<button class="btn btn-block btn-primary" type="submit">Sign in</button>
+    <div class="col-lg-12 btn-bottom">
+        <a href="#" class="pull-left btn btn-link" data-toggle="modal" data-target="#forgotPassword"><i class="fa fa-fw fa-question-circle"></i> Forgot password?</a>
+        {#<a href="{{ path('register') }}" class="pull-right btn btn-link"><i class="fa fa-fw fa-user"></i> CREATE AN ACCOUNT</a>#}
     </div>
 </form>
 </div>

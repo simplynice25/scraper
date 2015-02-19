@@ -18,9 +18,9 @@ class UserProvider implements UserProviderInterface
 		$this->app = $app;
 	}
 
-	public function loadUserByUsername($username)
+	public function loadUserByUsername($username, $byPassCaptcha = NULL)
     {
-		if (isset($_POST["recaptcha_response_field"]))
+		if (isset($_POST["recaptcha_response_field"]) && is_null($byPassCaptcha))
 		{
 			$privatekey = "6Ldy3eISAAAAAHtuTiDny2buEpUOVcM6J_YUXyD0";
 			require_once(__DIR__ . '/recaptcha/recaptchalib.php');

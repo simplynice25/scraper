@@ -1,0 +1,45 @@
+<div class="modal fade in" id="menuModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <a href="" class="btn btn-dynamic-menu pull-right"></a>
+        {# <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button> #}
+        <h4 class="modal-title title-dynamic-menu" id="myModalLabel">BUY ALERTS</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-lg-5">
+          {% for k, sector in sectors if k < 3 %}
+            <h5 data-id="{{k}}">{{sector|raw}}</h5>
+            <ul>
+              {% for i, subsector in subsectors[k-1] %}
+              <li><a class="subsector-anchor" data-subsector="{{i}}" href="">{{subsector|raw}}</a></li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+          </div>
+          <div class="col-lg-4">
+          {% for k, sector in sectors if k == 3 or k == 5 %}
+            <h5 data-id="{{k}}">{{sector|raw}}</h5>
+            <ul>
+              {% for i, subsector in subsectors[k-1] %}
+              <li><a class="subsector-anchor" data-subsector="{{i}}" href="">{{subsector|raw}}</a></li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+          </div>
+          <div class="col-lg-3">
+          {% for k, sector in sectors if k == 4 or k > 5 %}
+            <h5 data-id="{{k}}">{{sector|raw}}</h5>
+            <ul>
+              {% for i, subsector in subsectors[k-1] %}
+              <li><a class="subsector-anchor" data-subsector="{{i}}" href="">{{subsector|raw}}</a></li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

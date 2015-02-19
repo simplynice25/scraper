@@ -1,3 +1,4 @@
+{% set role = app.session.get('is_granted') %}
 {% set baseUrl = app.request.baseUrl %}
 <!DOCTYPE html>
 <html lang="en">
@@ -10,10 +11,18 @@
 
     <!-- Bootstrap -->
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-	<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-	<link href="{{ baseUrl }}/plugins/tags/bootstrap-tagsinput.css" rel="stylesheet">
-	{% block styles %}
-	{% endblock %}
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="{{ baseUrl }}/plugins/tags/bootstrap-tagsinput.css" rel="stylesheet">
+    {#
+    <style type="text/css">
+    * {
+      font-family: Tahoma;
+      font-size: 11px !important;
+    }
+    </style>
+    #}
+    {% block styles %}
+    {% endblock %}
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -34,18 +43,24 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{{ path('overview') }}">PSE Monitor</a>
+          <a class="navbar-brand" href="{{ path('overview') }}" style="padding-top:0"><img class="logo img-responsive" src="{{ path('login') }}img/logo.png"/></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
+            <li class="help-msg-paypal"><a>Help keep this site running </a></li>
+            <li class="paypal">
+              <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4FTKLFT22GRJY" target="_blank">
+              <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal The safer, easier way to pay online!"></a>
+            </li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-fw fa-user"></i> {{ app.session.get('credential') }} <span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" data-toggle="modal" data-target="#alertsModal">Alerts</a></li>
                     {% if app.session.get('is_granted') == 'ROLE_ADMIN' %}
+                    <li><a href="#" data-toggle="modal" data-target="#alertsModal">Alerts</a></li>
                     <li><a href="{{ path('admin') }}">Dashboard</a></li>
-                    {% endif %}
+                    <li><a href="{{ path('dates') }}">Skip Dates</a></li>
                     <li class="divider"></li>
+                    {% endif %}
                     <li><a href="{{ path('logout') }}">Sign out</a></li>
                 </ul>
             </li>
@@ -66,22 +81,29 @@
   </div>
   
   {% include 'front/includes/alerts-modal.twig' only %}
-  
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
   <script src="{{ baseUrl }}/plugins/tablesorter/jq.tablesorter.min.js"></script>
   <script src="{{ baseUrl }}/plugins/tags/bootstrap-tagsinput.js"></script>
-  <script>
-  	var config = {
-		doc: $(document),
-		baseUrl: "{{ baseUrl }}",
-		_currUrl: "{{ app.request.getRequestUri()|raw }}",
-		_delete: "{{ path('data-delete') }}",
-		_actions: "{{ path('data-actions') }}",
-		_pastData: "{{ path('past-data') }}",
-	}
+  <script type="text/javascript">
+    var config = {
+      doc: $(document),
+      baseUrl: "{{ baseUrl }}",
+      _currUrl: "{{ app.request.getRequestUri()|raw }}",
+      _delete: "{{ path('data-delete') }}",
+      _actions: "{{ path('data-actions') }}",
+      _pastData: "{{ path('past-data') }}",
+    }
   </script>
-  {% block scripts %}
-  {% endblock %}
+  {% block scripts %}{% endblock %}
+  <!-- Google Tag Manager -->
+  <noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-W6CV3M"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-W6CV3M');</script>
+  <!-- End Google Tag Manager -->
   </body>
 </html>

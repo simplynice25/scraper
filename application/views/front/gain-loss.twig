@@ -6,12 +6,17 @@
 
 {% block content %}
 <div class="col-lg-12 scraped-table-yest">
-<h1>{{ title }}</h1>
+{% if hasSector is defined and hasSector is null and subsector != 0 %}
+    <div class="alert alert-warning" style="margin-top:20px"><i class="fa fa-fw fa-exclamation-triangle"></i> No result for subsector <b>"{{ subsector|categories|raw }}</b>", showing all {{ title|lower }}.
+    </div>
+{% endif %}
+<h1 class="heading">{{ title|raw }}</h1>
 
 {% include 'front/includes/actions-btn.twig' %}
 
 <div class="row">
     <div class="col-lg-4">
+    <h5><b>ACTIVE STOCKS</b></h5>
 	<table id="scrapedTableActive" class="table table-bordered table-condensed table-hover main-table">
 			<thead>
 			<tr class="active">
@@ -35,14 +40,22 @@
 			{% elseif data.getSummary == 5 %}
 				{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
 			{% endif %}
-                
+            
+            {% set latestPrice = data.getCloseTotal %}
             {% set traded = data.getVolume*data.getCloseTotal %}
+            {% set sort_ = (role == "ROLE_ADMIN") ? traded : data.getVolume %}
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-                    <td data-value="{{ data.getCloseTotal }}">
-                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+                    <td class="price" data-traded="{{ latestPrice }}">
+                        {{ latestPrice|number_format(2, '.', ',') }}
                         <br/>
+                        {% if latestPrice == data.getWkHighRange %}
+                        <span>ALL TIME HIGH</span><br/>
+                        {% endif %}
+                        {% if latestPrice == data.getWkLowRange %}
+                        <span>ALL TIME LOW</span><br/>
+                        {% endif %}
                         <span>52H: {{ data.getWkHighRange }}</span>
                         <br/>
                         <span>52L: {{ data.getWkLowRange }}</span>
@@ -51,8 +64,8 @@
                         <br/>
                         <span>EPS: {{ data.getEps }}</span>
                     </td>
-					<td data-value="{{ data.getVolume }}">{{ data.getVolume|number_format }}</td>
-					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
+					<td data-traded="{{ data.getVolume }}">{{ data.getVolume|number_format }}</td>
+					<td class="{{ summ[0] }}" data-traded="{{sort_}}">
 						{{ summ[1] }} ({% if data.getChangePercent > 0 %}+{% endif %}{{ data.getChangePercent }}%)
 						<br/>
 						<span>MA: {{ data.getMovingAverages }} of {{ data.getMovingAveragesTotal }}</span>
@@ -69,6 +82,7 @@
 	</table>
 	</div>
 	<div class="col-lg-4">
+    <h5><b>GAINING STOCKS</b></h5>
 	<table id="scrapedTableGain" class="table table-bordered table-condensed table-hover main-table">
 			<thead>
 			<tr class="active">
@@ -93,14 +107,22 @@
 			{% elseif data.getSummary == 5 %}
 				{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
 			{% endif %}
-                
+            
+            {% set latestPrice = data.getCloseTotal %}
             {% set traded = data.getVolume*data.getCloseTotal %}
+            {% set sort_ = (role == "ROLE_ADMIN") ? traded : data.getVolume %}
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-					<td data-value="{{ data.getCloseTotal }}">
-                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+					<td class="price" data-traded="{{ latestPrice }}">
+                        {{ latestPrice|number_format(2, '.', ',') }}
                         <br/>
+                        {% if latestPrice == data.getWkHighRange %}
+                        <span>ALL TIME HIGH</span><br/>
+                        {% endif %}
+                        {% if latestPrice == data.getWkLowRange %}
+                        <span>ALL TIME LOW</span><br/>
+                        {% endif %}
                         <span>52H: {{ data.getWkHighRange }}</span>
                         <br/>
                         <span>52L: {{ data.getWkLowRange }}</span>
@@ -111,7 +133,7 @@
                     </td>
 					<td class="green-txt">+{{ data.getChangePercent }}%</td>
 					<!--<td>{{ data.getVolume|number_format(2, '.', ',') }}</td>-->
-					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
+					<td class="{{ summ[0] }}" data-traded="{{sort_}}">
 						{{ summ[1] }} ({% if data.getChangePercent > 0 %}+{% endif %}{{ data.getChangePercent }}%)
 						<br/>
 						<span>MA: {{ data.getMovingAverages }} of {{ data.getMovingAveragesTotal }}</span>
@@ -128,6 +150,7 @@
 	</table>
 	</div>
 	<div class="col-lg-4">
+    <h5><b>LOSING STOCKS</b></h5>
 	<table id="scrapedTableLoss" class="table table-bordered table-condensed table-hover main-table">
 			<thead>
 			<tr class="active">
@@ -151,14 +174,22 @@
 			{% elseif data.getSummary == 5 %}
 				{% set summ = { 0: "summ-neutral", 1: "NEUTRAL" } %}
 			{% endif %}
-                
+            
+            {% set latestPrice = data.getCloseTotal %}
             {% set traded = data.getVolume*data.getCloseTotal %}
+            {% set sort_ = (role == "ROLE_ADMIN") ? traded : data.getVolume %}
 
 				<tr>
 					<td class="abbr" data-toggle="modal" data-target="#pastData">{{ data.getAbbr }}</td>
-					<td data-value="{{ data.getCloseTotal }}">
-                        {{ data.getCloseTotal|number_format(2, '.', ',') }}
+					<td class="price" data-traded="{{ latestPrice }}">
+                        {{ latestPrice|number_format(2, '.', ',') }}
                         <br/>
+                        {% if latestPrice == data.getWkHighRange %}
+                        <span>ALL TIME HIGH</span><br/>
+                        {% endif %}
+                        {% if latestPrice == data.getWkLowRange %}
+                        <span>ALL TIME LOW</span><br/>
+                        {% endif %}
                         <span>52H: {{ data.getWkHighRange }}</span>
                         <br/>
                         <span>52L: {{ data.getWkLowRange }}</span>
@@ -168,7 +199,7 @@
                         <span>EPS: {{ data.getEps }}</span>
                     </td>
 					<td class="red-txt">{{ data.getChangePercent }}%</td>
-					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}">
+					<td class="{{ summ[0] }}" data-value="{{ data.getVolume }}" data-traded="{{sort_}}">
 						{{ summ[1] }} ({% if data.getChangePercent > 0 %}+{% endif %}{{ data.getChangePercent }}%)
 						<br/>
 						<span>MA: {{ data.getMovingAverages }} of {{ data.getMovingAveragesTotal }}</span>
@@ -194,27 +225,17 @@
 <script type="text/javascript" src="{{ baseUrl }}/js/jq.functions.js"></script>
 <script>
 	$(document).ready(function(){
-        $('#scrapedTableActive').tablesorter({
-            textExtraction: function(node){ 
-                var cell_value = $(node).text();
-                var sort_value = $(node).data('value');
-                return (sort_value != undefined) ? sort_value : cell_value;
-            }
-        });
-		$('#scrapedTableGain').tablesorter({
-            textExtraction: function(node){ 
-                var cell_value = $(node).text();
-                var sort_value = $(node).data('value');
-                return (sort_value != undefined) ? sort_value : cell_value;
-            }
-        }); 
-		$('#scrapedTableLoss').tablesorter({
-            textExtraction: function(node){ 
-                var cell_value = $(node).text();
-                var sort_value = $(node).data('value');
-                return (sort_value != undefined) ? sort_value : cell_value;
-            }
-        });
+        var tables = ['#scrapedTableActive', '#scrapedTableGain', '#scrapedTableLoss'];
+        for (var i=0;i<tables.length;i++)
+        {
+            $(tables[i]).tablesorter({
+                textExtraction: function(node){ 
+                    var cell_value = $(node).text();
+                    var sort_value = $(node).data('traded');
+                    return (sort_value != undefined) ? sort_value : cell_value;
+                },
+            }); 
+        }
 	});
 </script>
 {% endblock %}
